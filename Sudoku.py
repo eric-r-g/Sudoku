@@ -6,7 +6,7 @@ saida = [
 lista_de_impres = [0, 1, 3, 1, 3, 1, 3, 2, 3, 1, 3, 1, 3, 2, 3, 1, 3, 1, 3, 1, 0]
 
 def saida_grade(matriz):
-    cont = 0;
+    cont = 0
     for i in range(21):
         if lista_de_impres[i] < 3:
             print(saida[lista_de_impres[i]])
@@ -15,6 +15,7 @@ def saida_grade(matriz):
             cont += 1
 
 
-matriz = [["   "] * 9] * 9
+matriz = [["   " for l in range(9)] for l in range(9)]
 matriz[5][5] = " 7 "
 saida_grade(matriz)
+print(matriz)
