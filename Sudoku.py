@@ -1,3 +1,19 @@
+# Vamos colocar aqui variaveis que possivelmente iremos usar por todo o código
+
+# matriz é a matriz contendo todos os números do suduko
+matriz = [[" " for l in range(9)] for l in range(9)]
+
+# num_pres_xxxx são matrizes booleanas para indicar se um número do intervalo de 1 a 9 
+# está presente respectivamente na linha, coluna ou quadrante indicado
+
+num_pres_linha = [[False for l in range(9)] for l in range(9)]
+num_pres_coluna = [[False for l in range(9)] for l in range(9)]
+num_pres_quadrante = [[False for l in range(9)] for l in range(9)]
+
+# e_pista indica quais números da matriz são pistas ou não
+e_pista = [[False for l in range(9)] for l in range(9)]
+
+
 # Função de iniciar a matriz, recebe o arquivo de pistas
 
 def dividirEntrada(entrada):
@@ -18,6 +34,51 @@ def dividirEntrada(entrada):
   return [col, linha, numero]
 
 # Substituir o valor da matriz pelos valores recebidos em algum momento aqui
+
+def verificarEntrada(entrada_div):
+    # Função que recebe a coluna, a linha e qual comando (podendo ser um número) será realizado e 
+    # verifica se aquela funcionalidade é possivel ou não. Será analisado para
+    # a função de inserir, de retirar e de ver possibilidades e, além disso
+    # a função retorna qual erro foi. Erros possiveis:
+        # -1 - sem erros
+        # 0 - linha ou coluna fora do alcance
+        # 1 - interação com pista
+        # 2 - verificação de possibilidades em espaço já ocupado
+        # 3 - remoção em um espaço em branco
+        # 4 - inserção de numero fora dos limites 
+        # 5 - inserção de numero já presente (que fere as regras)
+        
+    # É feito aqui o ajuste das variaveis coluna e linha (para inteiros)
+    coluna, linha, numero = entrada_div[0], entrada_div[1], entrada_div[2]
+    linha = int(linha) - 1
+    if ord(coluna) >= 97 and ord(coluna) <= 122:
+        coluna = ord(coluna) - 97
+    else:
+        coluna = ord(coluna) - 65
+    
+    # É verificado cada possivel erro se acontece (em ordem listada)
+    if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
+        return [False, 0]
+    elif e_pista[linha][coluna]:
+        return [False, 1]
+    elif numero == '?':
+        if matriz[linha][coluna] != " ":
+            return [False, 2]
+    elif numero == '!':
+        if matriz[linha][coluna] == " ":
+            return [False, 3]
+    else:
+        # Feiro ajuste da variavel número somente agora
+        numero = int(numero) - 1
+        quandrante = coluna // 3 + 3 * (linha // 3)
+        if numero < 0 or numero > 8:
+            return [False, 4]
+        elif num_pres_linha[linha][numero] or num_pres_coluna[coluna][numero] or num_pres_quandrante[quandrante][numero]:
+            return [False, 5]
+            
+    # Caso a função chegue até aqui, quer dizer que não houve erro algum, portanto
+    # a função deverá prosseguir normalmente
+    return [True, -1]
 
 def saida_grade(mat):
     # Essa função recebe a matriz e retorna a grade do sudoku já pronta
@@ -45,6 +106,3 @@ def saida_grade(mat):
             lin += 1
 
 # Função para verificar se o jogo está valido, recebe a matriz
-
-matriz = [[" " for l in range(9)] for l in range(9)]
-saida_grade(matriz)
