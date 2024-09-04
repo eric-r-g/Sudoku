@@ -1,9 +1,23 @@
-# Função para receber a entrada e retornar o que for necessário
-    # Aqui dentro vai ter a leitura do arquivo provavelmente, talvez seja interessante alguém para isso já que a função é complicada por si só
-
 # Função de iniciar a matriz, recebe o arquivo de pistas
 
-# Substituir o valor da matriz pelos valores recebendo em algum momento aqui
+def dividirEntrada(entrada):
+  # Função que recebe a string de entrada e retornar um array com a coluna, linha e o numero respectivamente
+  # Tudo que é retornado é string, o numero vai ser o simbolo da operação se a entrada for uma operação "especial"
+  # Não é feita nenhuma verificação se os valores são válidos, se o usuário colocar linha 10 vai ser retornada linha 10 por exemplo 
+  entrada.replace(" ","").upper()
+
+  if "?" in entrada:
+    col, linha = entrada.replace("?","").split(",")
+    numero = "?"
+  elif "!" in entrada:
+    col, linha = entrada.replace("!","").split(",")
+    numero = "!"
+  else:
+    entrada, numero = entrada.replace(" ","").split(":")
+    col, linha = entrada.split(",")
+  return [col, linha, numero]
+
+# Substituir o valor da matriz pelos valores recebidos em algum momento aqui
 
 def saida_grade(mat):
     # Essa função recebe a matriz e retorna a grade do sudoku já pronta
