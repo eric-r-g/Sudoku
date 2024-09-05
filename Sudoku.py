@@ -14,6 +14,19 @@ num_pres_quadrante = [[False for l in range(9)] for l in range(9)]
 e_pista = [[False for l in range(9)] for l in range(9)]
 
 
+def inserir(linha, coluna, numero):
+    linha = int(linha) - 1
+    if ord(coluna) >= 97 and ord(coluna) <= 122:
+        coluna = ord(coluna) - 97
+    else:
+        coluna = ord(coluna) - 65
+    numero = int(numero)
+    quadrante = coluna // 3 + 3 * (linha // 3)
+    matriz[linha][coluna] = numero
+    num_pres_linha[linha][numero - 1] = True
+    num_pres_coluna[coluna][numero - 1] = True
+    num_pres_quadrante[coluna][numero - 1] = True
+
 # Função de iniciar a matriz, recebe o arquivo de pistas
 
 def dividirEntrada(entrada):
