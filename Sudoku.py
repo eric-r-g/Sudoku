@@ -26,7 +26,6 @@ def obter_arquivo(i):
 
 def registrar_acoes(arquivo):
   for jogada in arquivo:
-    print(jogada)
     registrar_acao(formatar_entrada(jogada))
        
 # NOTA: essa meio que tá sendo a função principal, talvez vale mudar o nome ou dividir mais?
@@ -44,16 +43,30 @@ def obter_entradas():
       jogadas_arquivo = obter_arquivo(2)
       registrar_acoes(jogadas_arquivo)
       saida_grade(matriz)
+
+def apagar_numero(coluna, linha):
+    numero = matriz[linha][coluna]
+    quadrante = coluna // 3 + 3 * (linha // 3)
+    matriz[linha][coluna] = " "
+    num_pres_linha[linha][numero - 1] = False
+    num_pres_coluna[coluna][numero - 1] = False
+    num_pres_quadrante[quadrante][numero - 1] = False
         
 def registrar_acao(acao):
-  coluna, linha, numero = acao
-  numero = int(numero) - 1
-  quadrante = coluna // 3 + 3 * (linha // 3)
-  matriz[linha][coluna] = numero + 1
-  num_pres_linha[linha][numero] = True
-  num_pres_coluna[coluna][numero] = True
-  # NOTA: isso aqui> vvvvvvvvv <tava como "coluna" imagino que era pra ser quadrante e mudei 
-  num_pres_quadrante[quadrante][numero] = True
+    coluna, linha, numero = acao
+    if numero == "!":
+        apagar_numero(coluna, linha)
+    elif numero == "?":
+        # analisar possiveis
+        print('')
+    else:
+        numero = int(numero)
+        quadrante = coluna // 3 + 3 * (linha // 3)
+        matriz[linha][coluna] = numero
+        num_pres_linha[linha][numero - 1] = True
+        num_pres_coluna[coluna][numero - 1] = True
+        # NOTA: isso aqui> vvvvvvvvv <tava como "coluna" imagino que era pra ser quadrante e mudei 
+        num_pres_quadrante[quadrante][numero - 1] = True
 
 def formatar_entrada(entrada):
   entrada = entrada.replace(" ","").upper()
