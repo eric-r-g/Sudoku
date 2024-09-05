@@ -15,17 +15,12 @@ e_pista = [[False for l in range(9)] for l in range(9)]
 
 
 def inserir(linha, coluna, numero):
-    linha = int(linha) - 1
-    if ord(coluna) >= 97 and ord(coluna) <= 122:
-        coluna = ord(coluna) - 97
-    else:
-        coluna = ord(coluna) - 65
     numero = int(numero)
     quadrante = coluna // 3 + 3 * (linha // 3)
-    matriz[linha][coluna] = numero
-    num_pres_linha[linha][numero - 1] = True
-    num_pres_coluna[coluna][numero - 1] = True
-    num_pres_quadrante[coluna][numero - 1] = True
+    matriz[linha][coluna] = numero + 1
+    num_pres_linha[linha][numero] = True
+    num_pres_coluna[coluna][numero] = True
+    num_pres_quadrante[coluna][numero] = True
 
 # Função de iniciar a matriz, recebe o arquivo de pistas
 
@@ -44,6 +39,9 @@ def dividirEntrada(entrada):
   else:
     entrada, numero = entrada.split(":")
     col, linha = entrada.split(",")
+      
+  linha = int(linha) - 1
+  coluna = ord(coluna) - 65  
   return [col, linha, numero]
 
 # Substituir o valor da matriz pelos valores recebidos em algum momento aqui
@@ -62,13 +60,8 @@ def verificarEntrada(entrada_div):
         # 5 - inserção de numero já presente (que fere as regras)
         
     # É feito aqui o ajuste das variaveis coluna e linha (para inteiros)
-    coluna, linha, numero = entrada_div[0], entrada_div[1], entrada_div[2]
-    linha = int(linha) - 1
-    if ord(coluna) >= 97 and ord(coluna) <= 122:
-        coluna = ord(coluna) - 97
-    else:
-        coluna = ord(coluna) - 65
-    
+    coluna, linha, numero = entrada_div
+
     # É verificado cada possivel erro se acontece (em ordem listada)
     if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
         return [False, 0]
