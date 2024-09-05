@@ -86,7 +86,7 @@ def verificarEntrada(entrada_div):
         quandrante = coluna // 3 + 3 * (linha // 3)
         if numero < 0 or numero > 8:
             return [False, 4]
-        elif num_pres_linha[linha][numero] or num_pres_coluna[coluna][numero] or num_pres_quandrante[quandrante][numero]:
+        elif num_pres_linha[linha][numero] or num_pres_coluna[coluna][numero] or num_pres_quadrante[quandrante][numero]:
             return [False, 5]
             
     # Caso a função chegue até aqui, quer dizer que não houve erro algum, portanto
