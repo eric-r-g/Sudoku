@@ -20,7 +20,7 @@ def dividirEntrada(entrada):
   # Função que recebe a string de entrada e retornar um array com a coluna, linha e o numero respectivamente
   # Tudo que é retornado é string, o numero vai ser o simbolo da operação se a entrada for uma operação "especial"
   # Não é feita nenhuma verificação se os valores são válidos, se o usuário colocar linha 10 vai ser retornada linha 10 por exemplo 
-  entrada.replace(" ","").upper()
+  entrada = entrada.replace(" ","").upper()
 
   if "?" in entrada:
     col, linha = entrada.replace("?","").split(",")
@@ -29,7 +29,7 @@ def dividirEntrada(entrada):
     col, linha = entrada.replace("!","").split(",")
     numero = "!"
   else:
-    entrada, numero = entrada.replace(" ","").split(":")
+    entrada, numero = entrada.split(":")
     col, linha = entrada.split(",")
   return [col, linha, numero]
 
