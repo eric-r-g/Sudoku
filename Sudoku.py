@@ -24,18 +24,19 @@ def obter_arquivo(i):
   with open(sys.argv[i], 'r') as file:
     return file.readlines()
 
-def registrar_acoes(arquivo):
+def registrar_acoes(arquivo, eh_arquivo_pistas):
   for jogada in arquivo:
     jogada = formatar_entrada(jogada)
     registrar_acao(jogada)
-    coluna, linha = jogada[0], jogada[1]
-    eh_pista[linha][coluna] = True
+    if eh_arquivo_pistas:
+      coluna, linha = jogada[0], jogada[1]
+      eh_pista[linha][coluna] = True
     
        
 # NOTA: essa meio que tá sendo a função principal, talvez vale mudar o nome ou dividir mais?
 def obter_entradas():
     pistas_arquivo = obter_arquivo(1)
-    registrar_acoes(pistas_arquivo)
+    registrar_acoes(pistas_arquivo, True)
     	
     if (modo == 1):
       saida_grade(matriz)
@@ -45,7 +46,7 @@ def obter_entradas():
         saida_grade(matriz)
     else:
       jogadas_arquivo = obter_arquivo(2)
-      registrar_acoes(jogadas_arquivo)
+      registrar_acoes(jogadas_arquivo, False)
       saida_grade(matriz)
 
 def apagar_numero(coluna, linha):
@@ -73,11 +74,11 @@ def registrar_acao(acao):
     if numero == "!":
         apagar_numero(coluna, linha)
     elif numero == "?":
-        numeros_possiv, quant = numero_verificar_possibilidades(coluna, linha)
+        numeros_possiv, quant = verificar_possibilidades(coluna, linha)
         if quant == 0:
-          print("não possui números possiveis)
+          print("não possui números possiveis")
         else:
-          print(numeros_possiv)
+          print("Número(s) possiveis: " +numeros_possiv)
     else:
         numero = int(numero)
         quadrante = coluna // 3 + 3 * (linha // 3)
