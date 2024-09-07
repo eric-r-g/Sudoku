@@ -1,5 +1,6 @@
 import sys
 
+quantidade_preenchida = 0;
 finalizado = False
 matriz = [[" " for l in range(9)] for l in range(9)]
 
@@ -27,10 +28,12 @@ def obter_arquivo(i):
 def registrar_acoes(arquivo, eh_arquivo_pistas):
   for jogada in arquivo:
     jogada = formatar_entrada(jogada)
-    registrar_acao(jogada)
-    if eh_arquivo_pistas:
-      coluna, linha = jogada[0], jogada[1]
-      eh_pista[linha][coluna] = True
+    jogada_valida = verificar_jogada(jogada)
+    if jogada_valida[0]:
+      registrar_acao(jogada)
+      if eh_arquivo_pistas:
+        coluna, linha = jogada[0], jogada[1]
+        eh_pista[linha][coluna] = True
     
        
 # NOTA: essa meio que tá sendo a função principal, talvez vale mudar o nome ou dividir mais?
@@ -41,9 +44,16 @@ def obter_entradas():
     if (modo == 1):
       saida_grade(matriz)
       while not finalizado:
-        j = input("Insira a jogada: ")
-        registrar_acao(formatar_entrada(j))
-        saida_grade(matriz)
+        j = formatar_entrada(input("Insira a jogada: "))
+        jogada_valida = verificar_jogada(j)
+        if jogada_valida[0]:
+          registrar_acao(j)
+          saida_grade(matriz)
+        else:
+          # colocar aqui para imprimir os tipos de erro
+          print('')
+        if quantidade_preenchida = 81:
+          finalizado = True
     else:
       jogadas_arquivo = obter_arquivo(2)
       registrar_acoes(jogadas_arquivo, False)
@@ -56,8 +66,9 @@ def apagar_numero(coluna, linha):
     num_pres_linha[linha][numero - 1] = False
     num_pres_coluna[coluna][numero - 1] = False
     num_pres_quadrante[quadrante][numero - 1] = False
+    quantidade_preenchida -= 1
 
-def verificar_possibilidades(coluna, linha):
+def numero_verificar_possibilidades(coluna, linha):
     quadrante = coluna // 3 + 3 * (linha // 3)
     saida = ""
     quantia = 0
@@ -87,6 +98,7 @@ def registrar_acao(acao):
         num_pres_coluna[coluna][numero - 1] = True
         # NOTA: isso aqui> vvvvvvvvv <tava como "coluna" imagino que era pra ser quadrante e mudei 
         num_pres_quadrante[quadrante][numero - 1] = True
+        quantidade_preenchida += 1
 
 def formatar_entrada(entrada):
   entrada = entrada.replace(" ","").upper()
