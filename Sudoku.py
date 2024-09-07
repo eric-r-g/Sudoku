@@ -51,14 +51,29 @@ def apagar_numero(coluna, linha):
     num_pres_linha[linha][numero - 1] = False
     num_pres_coluna[coluna][numero - 1] = False
     num_pres_quadrante[quadrante][numero - 1] = False
+
+def verificar_possibilidades(coluna, linha):
+    quadrante = coluna // 3 + 3 * (linha // 3)
+    saida = ""
+    quantia = 0
+    for i in range(9):
+        if not num_pres_linha[linha][i] and not num_pres_coluna[coluna][i] and not num_pres_quadrante[quadrante][i]:
+            quantia += 1
+            if quantia != 1:
+                saida = saida + ', '
+            saida = saida + str(i + 1)
+    return [saida, quantia] 
         
 def registrar_acao(acao):
     coluna, linha, numero = acao
     if numero == "!":
         apagar_numero(coluna, linha)
     elif numero == "?":
-        # analisar possiveis
-        print('')
+        numeros_possiv, quant = numero_verificar_possibilidades(coluna, linha)
+        if quant == 0:
+          print("não possui números possiveis)
+        else:
+          print(numeros_possiv)
     else:
         numero = int(numero)
         quadrante = coluna // 3 + 3 * (linha // 3)
