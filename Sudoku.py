@@ -10,7 +10,7 @@ num_pres_linha = [[False for l in range(9)] for l in range(9)]
 num_pres_coluna = [[False for l in range(9)] for l in range(9)]
 num_pres_quadrante = [[False for l in range(9)] for l in range(9)]
 
-e_pista = [[False for l in range(9)] for l in range(9)]
+eh_pista = [[False for l in range(9)] for l in range(9)]
 
 # entrada de dados
 if len(sys.argv) < 2 or len(sys.argv) > 3:
@@ -26,7 +26,11 @@ def obter_arquivo(i):
 
 def registrar_acoes(arquivo):
   for jogada in arquivo:
-    registrar_acao(formatar_entrada(jogada))
+    jogada = formatar_entrada(jogada)
+    registrar_acao(jogada)
+    coluna, linha = jogada[0], jogada[1]
+    eh_pista[linha][coluna] = True
+    
        
 # NOTA: essa meio que tá sendo a função principal, talvez vale mudar o nome ou dividir mais?
 def obter_entradas():
@@ -105,7 +109,7 @@ def verificar_jogada(entrada_div):
 
   if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
     return [False, 0]
-  elif e_pista[linha][coluna]:
+  elif eh_pista[linha][coluna]:
     return [False, 1]
   elif numero == '?':
     if matriz[linha][coluna] != " ":
