@@ -52,7 +52,7 @@ def obter_entradas():
         else:
           # colocar aqui para imprimir os tipos de erro
           print('')
-        if quantidade_preenchida = 81:
+        if quantidade_preenchida == 81:
           finalizado = True
     else:
       jogadas_arquivo = obter_arquivo(2)
