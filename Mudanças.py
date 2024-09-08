@@ -100,7 +100,7 @@ def inserir_numero(coluna, linha, numero):
     num_pres_quadrante[quadrante][numero - 1] = True
 
 def formatar_entrada(entrada):
-  entrada = entrada.replace(" ","").upper()
+  entrada = entrada.replace(" ","").strip().upper()
 
   if "?" in entrada:
     coluna, linha = entrada.replace("?","").split(",")
