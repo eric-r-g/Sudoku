@@ -126,8 +126,7 @@ def verificar_jogada(entrada_div):
     elif eh_pista[linha][coluna]:
         valida = False
     elif conteudo == '?':
-        valida = False
-    if matriz[linha][coluna] != " ":
+      if matriz[linha][coluna] != " ":
         valida = False
     elif conteudo == '!':
         if matriz[linha][coluna] == " ":
