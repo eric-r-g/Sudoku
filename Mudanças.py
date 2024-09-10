@@ -102,7 +102,6 @@ def verificar_possibilidades(coluna, linha):
 
 def obter_dica(coluna, linha):
     n_possiveis = verificar_possibilidades(coluna, linha)
-    print(n_possiveis)
 
     if len(n_possiveis) == 0:
         print("Não possui números possiveis para essa posição.")
@@ -110,12 +109,23 @@ def obter_dica(coluna, linha):
         print("Número(s) possiveis: " + ', '.join(map(str, n_possiveis)))
 
 def inserir_numero(coluna, linha, numero):
+    
+    substituir = ""
+    num_anterior = matriz[linha][coluna]
     quadrante = coluna // 3 + 3 * (linha // 3)
-    matriz[linha][coluna] = numero
-    num_pres_linha[linha][numero - 1] = True
-    num_pres_coluna[coluna][numero - 1] = True
-    # NOTA: isso aqui> vvvvvvvvv <tava como "coluna" imagino que era pra ser quadrante e mudei 
-    num_pres_quadrante[quadrante][numero - 1] = True
+    if num_anterior != ' ':
+    	num_anterior = int(num_anterior) - 1
+    	substituir = input("Já há um número nessa posição, deseja substituir? (Digite sim caso queira): ").upper()
+    	if substituir == "SIM":
+            num_pres_linha[linha][num_anterior] = False
+            num_pres_coluna[coluna][num_anterior] = False
+            num_pres_quadrante[quadrante][num_anterior] = False
+            
+    if num_anterior == ' ' or substituir == "SIM":
+        matriz[linha][coluna] = numero
+        num_pres_linha[linha][numero - 1] = True
+        num_pres_coluna[coluna][numero - 1] = True
+        num_pres_quadrante[quadrante][numero - 1] = True
 
 def formatar_entrada(entrada):
   entrada = entrada.replace(" ","").strip().upper()
