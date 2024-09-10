@@ -16,14 +16,19 @@ def obter_arquivo(i):
     return file.readlines()
 
 def registrar_acoes(arquivo, eh_arquivo_pistas):
-  for jogada in arquivo:
-    jogada = formatar_entrada(jogada)
-
-    if verificar_jogada(jogada):
-      registrar_acao(jogada)
-      if eh_arquivo_pistas:
-        coluna, linha = jogada[0], jogada[1]
-        eh_pista[linha][coluna] = True
+    global finalizado
+    for jogada in arquivo:
+        if not finalizado:
+            jogada = formatar_entrada(jogada)
+        
+            if eh_arquivo_pistas:
+                if verificar_jogada(jogada)[0]:
+                    registrar_acao(jogada)
+                    coluna, linha = jogada[0], jogada[1]
+                    eh_pista[linha][coluna] = True
+                else:
+                    exibir_erro(verificar_jogada(jogada)[1])
+                    finalizado = True
            
 # Função principal
 def iniciar(modo):
@@ -31,11 +36,11 @@ def iniciar(modo):
     registrar_acoes(pistas_arquivo, True)
     	
     modos = {
-        1: executar_interativo(),
-        2: executar_batch()
+        1: executar_interativo,
+        2: executar_batch
     }
     
-    if modo in modos:
+    if modo in modos and not finalizado:
         modos[modo]()
 
 def executar_batch():
@@ -43,18 +48,31 @@ def executar_batch():
     registrar_acoes(jogadas_arquivo, False)
     saida_grade(matriz)
 
+def exibir_erro(codigo):
+    erros = {
+        0: "msg 1",
+        1: "msg 2",
+        2: "msg 3",
+        3: "msg 4",
+        4: "msg 5",
+        5: "msg 6"
+    }
+    
+    if codigo in erros:
+        print(erros[codigo])
+
 def executar_interativo():
     saida_grade(matriz)
 
     while not finalizado:
         j = formatar_entrada(input("Insira sua ação: "))
-
-        if verificar_jogada(j):
+        jogada_valida = verificar_jogada(j)
+        
+        if jogada_valida[0]:
           registrar_acao(j)
           saida_grade(matriz)
         else:
-          # colocar aqui para imprimir os tipos de erro
-          print('erro')
+          exibir_erro(jogada_valida[1])
 
 def apagar_numero(coluna, linha):
     numero = matriz[linha][coluna]
@@ -119,26 +137,26 @@ def formatar_entrada(entrada):
 def verificar_jogada(entrada_div):
     coluna, linha, conteudo = entrada_div
 
-    valida = True
+    valida = [True]
     
     if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
-        valida = False
+        valida = [False, 0]
     elif eh_pista[linha][coluna]:
-        valida = False
+        valida = [False, 1]
     elif conteudo == '?':
       if matriz[linha][coluna] != " ":
-        valida = False
+        valida = [False, 2]
     elif conteudo == '!':
         if matriz[linha][coluna] == " ":
-            valida = False
+            valida = [False, 3]
     else:
         try:
             conteudo = int(conteudo) - 1
             quadrante = coluna // 3 + 3 * (linha // 3)
             if conteudo < 0 or conteudo > 8:
-                valida = False
+                valida = [False, 4]
             elif num_pres_linha[linha][conteudo] or num_pres_coluna[coluna][conteudo] or num_pres_quadrante[quadrante][conteudo]:
-                valida = False
+                valida = [False, 5]
         except ValueError:
             return valida
     
@@ -148,8 +166,8 @@ def registrar_acao(acao):
     coluna, linha, conteudo = acao
 
     acoes = {
-        "!": apagar_numero(coluna, linha),
-        "?": obter_dica(coluna, linha) 
+        "!": apagar_numero,
+        "?": obter_dica 
     }
 
     try:
@@ -159,7 +177,7 @@ def registrar_acao(acao):
     # se não for um número, vai tentar procurar uma ação com o conteudo da variável
     except ValueError:
         if conteudo in acoes:
-            acoes[conteudo]()
+            acoes[conteudo](coluna, linha)
 
 def saida_grade(mat):
   fil_padrao = [
