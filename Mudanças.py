@@ -50,12 +50,13 @@ def executar_batch():
 
 def exibir_erro(codigo):
     erros = {
-        0: "msg 1",
-        1: "msg 2",
-        2: "msg 3",
-        3: "msg 4",
-        4: "msg 5",
-        5: "msg 6"
+        -1: "msg 1",
+        -2: "msg 2",
+        -3: "msg 3",
+        -4: "msg 4",
+        -5: "msg 5",
+        -6: "msg 6",
+        -7: "msg 7"
     }
     
     if codigo in erros:
@@ -114,7 +115,7 @@ def inserir_numero(coluna, linha, numero):
     quadrante = coluna // 3 + 3 * (linha // 3)
     if num_anterior != ' ':
     	num_anterior = int(num_anterior) - 1
-    	substituir = input("Já há um número nessa posição, deseja substituir? (Digite sim caso queira): ").upper()
+    	substituir = input("Já há um número nessa posição, deseja substituir? (Digite sim caso queira): ").strip().upper()
     	if substituir == "SIM":
             num_pres_linha[linha][num_anterior] = False
             num_pres_coluna[coluna][num_anterior] = False
