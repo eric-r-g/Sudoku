@@ -1,107 +1,176 @@
 import sys
 
-quantidade_preenchida = 0;
 finalizado = False
-matriz = [[" " for l in range(9)] for l in range(9)]
 
 # num_pres_xxxx são matrizes booleanas para indicar se um número do intervalo de 1 a 9 
 # está presente respectivamente na linha, coluna ou quadrante indicado
 
+matriz = [[" " for l in range(9)] for l in range(9)]
 num_pres_linha = [[False for l in range(9)] for l in range(9)]
 num_pres_coluna = [[False for l in range(9)] for l in range(9)]
 num_pres_quadrante = [[False for l in range(9)] for l in range(9)]
-
 eh_pista = [[False for l in range(9)] for l in range(9)]
-
-# entrada de dados
-if len(sys.argv) < 2 or len(sys.argv) > 3:
-  print("O número de parâmetros enviados para executar o sudoku é inválido.")
-
-# 1 -> interativo
-# 2 -> batch
-modo = len(sys.argv) - 1
 
 def obter_arquivo(i):
   with open(sys.argv[i], 'r') as file:
     return file.readlines()
+def obter_arquivo_str(i):
+    with open(sys.argv[i], 'r') as file:
+        return file.read()
 
-def registrar_acoes(arquivo, eh_arquivo_pistas):
-  for jogada in arquivo:
-    jogada = formatar_entrada(jogada)
-    jogada_valida = verificar_jogada(jogada)
-    if jogada_valida[0]:
-      registrar_acao(jogada)
-      if eh_arquivo_pistas:
-        coluna, linha = jogada[0], jogada[1]
-        eh_pista[linha][coluna] = True
+def registrar_acoes(arquivo, eh_arquivo_pistas, batch = False):
+    global finalizado
+    for jogada in arquivo:
+        if not finalizado:
+            jogada = formatar_entrada(jogada)
+
+            if eh_arquivo_pistas and not batch:
+                if verificar_jogada(jogada)[0]:
+                    registrar_acao(jogada)
+                    coluna, linha = jogada[0], jogada[1]
+                    eh_pista[linha][coluna] = True
+                else:
+                    exibir_erro(verificar_jogada(jogada)[1])
+                    finalizado = True
+            elif eh_arquivo_pistas:
+                # A verificação das pistas do batch é diferente então estão sendo feitas no próprio executar_batch
+                registrar_acao(jogada)
+                coluna, linha = jogada[0], jogada[1]
+                eh_pista[linha][coluna] = True
+            elif batch:
+                # isso não tá verificando certo se é pista acho
+                if verificar_jogada(jogada):
+                    registrar_acao(jogada)
+                else:
+                    print('A jogada ('+jogada[0]+','+jogada[1]+') = '+jogada[2]+' eh invalida!')
+           
+# Função principal
+def iniciar(modo):
+    	
+    modos = {
+        1: executar_interativo,
+        2: executar_batch
+    }
     
-       
-# NOTA: essa meio que tá sendo a função principal, talvez vale mudar o nome ou dividir mais?
-def obter_entradas():
+    if modo in modos and not finalizado:
+        modos[modo]()
+
+def executar_batch():
+    # lá no inserir número não é pra pedir substituição caso seja modo batch, usar uma global?
+    pistas_arquivo = obter_arquivo(1)
+    pistas_str = obter_arquivo_str(1)
+
+    invalida = False
+    if len(pistas_arquivo) < 1 or len(pistas_arquivo) > 80:
+        invalida = True 
+    for pista1 in pistas_arquivo:
+        pista1 = pista1.split(":")
+        if pistas_str.count(pista1[0]) > 1:
+            for pista2 in pistas_arquivo:
+                pista2  = pista2.split(":")
+                if pista1[0] == pista2[0] and pista1[1] != pista2[1]: invalida = True
+                
+    if not invalida:
+        registrar_acoes(pistas_arquivo, True, True)
+        jogadas_arquivo = obter_arquivo(2)
+        registrar_acoes(jogadas_arquivo, False, True)
+        saida_grade(matriz)
+        if finalizado:
+            print('A grade foi preenchida com sucesso!')
+        else:
+            print('A grade nao foi preenchida!')
+    else:
+        print('Configuracao de dicas invalida.')
+
+def exibir_erro(codigo):
+    erros = {
+        0: "msg 1",
+        1: "msg 2",
+        2: "msg 3",
+        3: "msg 4",
+        4: "msg 5",
+        5: "msg 6"
+    }
+    
+    if codigo in erros:
+        print(erros[codigo])
+
+def executar_interativo():
     pistas_arquivo = obter_arquivo(1)
     registrar_acoes(pistas_arquivo, True)
-    	
-    if (modo == 1):
-      saida_grade(matriz)
-      while not finalizado:
-        j = formatar_entrada(input("Insira a jogada: "))
+
+    saida_grade(matriz)
+
+    quantidade_pistas = len(pistas_arquivo)
+    if quantidade_pistas < 1 or quantidade_pistas > 80:
+        print('Número inválido de pistas: '+quantidade_pistas)
+        finalizado = True
+
+    while not finalizado:
+        j = formatar_entrada(input("Insira sua ação: "))
         jogada_valida = verificar_jogada(j)
+        
         if jogada_valida[0]:
           registrar_acao(j)
           saida_grade(matriz)
         else:
-          # colocar aqui para imprimir os tipos de erro
-          print('')
-        if quantidade_preenchida == 81:
-          finalizado = True
-    else:
-      jogadas_arquivo = obter_arquivo(2)
-      registrar_acoes(jogadas_arquivo, False)
-      saida_grade(matriz)
+          exibir_erro(jogada_valida[1])
 
 def apagar_numero(coluna, linha):
     numero = matriz[linha][coluna]
-    quadrante = coluna // 3 + 3 * (linha // 3)
-    matriz[linha][coluna] = " "
-    num_pres_linha[linha][numero - 1] = False
-    num_pres_coluna[coluna][numero - 1] = False
-    num_pres_quadrante[quadrante][numero - 1] = False
-    quantidade_preenchida -= 1
 
-def numero_verificar_possibilidades(coluna, linha):
-    quadrante = coluna // 3 + 3 * (linha // 3)
-    saida = ""
-    quantia = 0
-    for i in range(9):
-        if not num_pres_linha[linha][i] and not num_pres_coluna[coluna][i] and not num_pres_quadrante[quadrante][i]:
-            quantia += 1
-            if quantia != 1:
-                saida = saida + ', '
-            saida = saida + str(i + 1)
-    return [saida, quantia] 
-        
-def registrar_acao(acao):
-    coluna, linha, numero = acao
-    if numero == "!":
-        apagar_numero(coluna, linha)
-    elif numero == "?":
-        numeros_possiv, quant = verificar_possibilidades(coluna, linha)
-        if quant == 0:
-          print("não possui números possiveis")
-        else:
-          print("Número(s) possiveis: " +numeros_possiv)
-    else:
+    try:
         numero = int(numero)
         quadrante = coluna // 3 + 3 * (linha // 3)
+        matriz[linha][coluna] = " "
+        num_pres_linha[linha][numero - 1] = False
+        num_pres_coluna[coluna][numero - 1] = False
+        num_pres_quadrante[quadrante][numero - 1] = False
+    # se não for um número, vai entender que a entrada n existe
+    except ValueError:
+        print("nao da pra apagar o nada paizao")
+
+def verificar_possibilidades(coluna, linha):
+    quadrante = coluna // 3 + 3 * (linha // 3)
+    numeros_possiveis = []
+    
+    for i in range(9):
+        if (not num_pres_linha[linha][i]
+        and not num_pres_coluna[coluna][i]
+        and not num_pres_quadrante[quadrante][i]):
+            numeros_possiveis.append(i + 1)
+
+    return numeros_possiveis
+
+def obter_dica(coluna, linha):
+    n_possiveis = verificar_possibilidades(coluna, linha)
+
+    if len(n_possiveis) == 0:
+        print("Não possui números possiveis para essa posição.")
+    else:
+        print("Número(s) possiveis: " + ', '.join(map(str, n_possiveis)))
+
+def inserir_numero(coluna, linha, numero):
+    
+    substituir = ""
+    num_anterior = matriz[linha][coluna]
+    quadrante = coluna // 3 + 3 * (linha // 3)
+    if num_anterior != ' ':
+        num_anterior = int(num_anterior) - 1
+        substituir = input("Já há um número nessa posição, deseja substituir? (Digite sim caso queira): ").upper()
+        if substituir == "SIM":
+            num_pres_linha[linha][num_anterior] = False
+            num_pres_coluna[coluna][num_anterior] = False
+            num_pres_quadrante[quadrante][num_anterior] = False
+            
+    if num_anterior == ' ' or substituir == "SIM":
         matriz[linha][coluna] = numero
         num_pres_linha[linha][numero - 1] = True
         num_pres_coluna[coluna][numero - 1] = True
-        # NOTA: isso aqui> vvvvvvvvv <tava como "coluna" imagino que era pra ser quadrante e mudei 
         num_pres_quadrante[quadrante][numero - 1] = True
-        quantidade_preenchida += 1
 
 def formatar_entrada(entrada):
-  entrada = entrada.replace(" ","").upper()
+  entrada = entrada.replace(" ","").strip().upper()
 
   if "?" in entrada:
     coluna, linha = entrada.replace("?","").split(",")
@@ -118,26 +187,49 @@ def formatar_entrada(entrada):
   return [coluna, linha, numero]
 
 def verificar_jogada(entrada_div):
-  coluna, linha, numero = entrada_div
+    coluna, linha, conteudo = entrada_div
 
-  if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
-    return [False, 0]
-  elif eh_pista[linha][coluna]:
-    return [False, 1]
-  elif numero == '?':
-    if matriz[linha][coluna] != " ":
-      return [False, 2]
-  elif numero == '!':
-    if matriz[linha][coluna] == " ":
-      return [False, 3]
-  else:
-    numero = int(numero) - 1
-    quandrante = coluna // 3 + 3 * (linha // 3)
-    if numero < 0 or numero > 8:
-      return [False, 4]
-    elif num_pres_linha[linha][numero] or num_pres_coluna[coluna][numero] or num_pres_quadrante[quandrante][numero]:
-      return [False, 5]
-  return [True, -1]
+    valida = [True]
+    
+    if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
+        valida = [False, 0]
+    elif eh_pista[linha][coluna]:
+        valida = [False, 1]
+    elif conteudo == '?':
+      if matriz[linha][coluna] != " ":
+        valida = [False, 2]
+    elif conteudo == '!':
+        if matriz[linha][coluna] == " ":
+            valida = [False, 3]
+    else:
+        try:
+            conteudo = int(conteudo) - 1
+            quadrante = coluna // 3 + 3 * (linha // 3)
+            if conteudo < 0 or conteudo > 8:
+                valida = [False, 4]
+            elif num_pres_linha[linha][conteudo] or num_pres_coluna[coluna][conteudo] or num_pres_quadrante[quadrante][conteudo]:
+                valida = [False, 5]
+        except ValueError:
+            return valida
+    
+    return valida
+
+def registrar_acao(acao):
+    coluna, linha, conteudo = acao
+
+    acoes = {
+        "!": apagar_numero,
+        "?": obter_dica 
+    }
+
+    try:
+        # checa se é um número de 1-9
+        if len(conteudo) == 1 and 1 <= int(conteudo) <= 9:
+            inserir_numero(coluna, linha, int(conteudo))
+    # se não for um número, vai tentar procurar uma ação com o conteudo da variável
+    except ValueError:
+        if conteudo in acoes:
+            acoes[conteudo](coluna, linha)
 
 def saida_grade(mat):
   fil_padrao = [
@@ -157,4 +249,11 @@ def saida_grade(mat):
       print(" {} || {}".format(mat[lin][8], lin + 1))
       lin += 1
 
-obter_entradas()
+# entrada de dados
+# 1 -> interativo
+# 2 -> batch
+if len(sys.argv) < 2 or len(sys.argv) > 3:
+  print("O número de parâmetros enviados para executar o sudoku é inválido.")
+else:
+    modo = len(sys.argv) - 1
+    iniciar(modo)
