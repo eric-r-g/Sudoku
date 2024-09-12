@@ -1,6 +1,7 @@
 import sys
 
 finalizado = False
+batch = False
 
 # num_pres_xxxx são matrizes booleanas para indicar se um número do intervalo de 1 a 9 
 # está presente respectivamente na linha, coluna ou quadrante indicado
@@ -38,11 +39,10 @@ def registrar_acoes(arquivo, eh_arquivo_pistas, batch = False):
                 coluna, linha = jogada[0], jogada[1]
                 eh_pista[linha][coluna] = True
             elif batch:
-                # isso não tá verificando certo se é pista acho
-                if verificar_jogada(jogada):
+                if verificar_jogada(jogada)[0]:
                     registrar_acao(jogada)
                 else:
-                    print('A jogada ('+jogada[0]+','+jogada[1]+') = '+jogada[2]+' eh invalida!')
+                    print('A jogada ('+chr(jogada[0]+65)+','+str(jogada[1]+1)+') = '+str(jogada[2])+' eh invalida!')
            
 # Função principal
 def iniciar(modo):
@@ -56,25 +56,29 @@ def iniciar(modo):
         modos[modo]()
 
 def executar_batch():
-    # lá no inserir número não é pra pedir substituição caso seja modo batch, usar uma global?
+    # Solução talvez temporária pra um problema bem especifico:
+    # Lá no inserir arquivo o miguel pede pra não perguntar se quer substituir caso seja batch
+    global batch
+    batch = True    
+
     pistas_arquivo = obter_arquivo(1)
-    pistas_str = obter_arquivo_str(1)
+    pistas_str = obter_arquivo_str(1).replace(" ", "").strip().upper()
 
     invalida = False
     if len(pistas_arquivo) < 1 or len(pistas_arquivo) > 80:
         invalida = True 
     for pista1 in pistas_arquivo:
-        pista1 = pista1.split(":")
+        pista1 = pista1.replace(" ", "").strip().upper().split(":")
         if pistas_str.count(pista1[0]) > 1:
             for pista2 in pistas_arquivo:
-                pista2  = pista2.split(":")
-                if pista1[0] == pista2[0] and pista1[1] != pista2[1]: invalida = True
+                pista2  = pista2.replace(" ", "").strip().upper().split(":")
+                if pista1[0] == pista2[0] and pista1[1] != pista2[1]: 
+                    invalida = True
                 
     if not invalida:
         registrar_acoes(pistas_arquivo, True, True)
         jogadas_arquivo = obter_arquivo(2)
         registrar_acoes(jogadas_arquivo, False, True)
-        saida_grade(matriz)
         if finalizado:
             print('A grade foi preenchida com sucesso!')
         else:
@@ -155,7 +159,7 @@ def inserir_numero(coluna, linha, numero):
     substituir = ""
     num_anterior = matriz[linha][coluna]
     quadrante = coluna // 3 + 3 * (linha // 3)
-    if num_anterior != ' ':
+    if num_anterior != ' ' and not batch:
         num_anterior = int(num_anterior) - 1
         substituir = input("Já há um número nessa posição, deseja substituir? (Digite sim caso queira): ").upper()
         if substituir == "SIM":
@@ -163,7 +167,7 @@ def inserir_numero(coluna, linha, numero):
             num_pres_coluna[coluna][num_anterior] = False
             num_pres_quadrante[quadrante][num_anterior] = False
             
-    if num_anterior == ' ' or substituir == "SIM":
+    if num_anterior == ' ' or substituir == "SIM" or batch:
         matriz[linha][coluna] = numero
         num_pres_linha[linha][numero - 1] = True
         num_pres_coluna[coluna][numero - 1] = True
