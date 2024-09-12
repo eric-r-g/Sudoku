@@ -19,15 +19,15 @@ def registrar_acoes(arquivo, eh_arquivo_pistas):
     global finalizado
     for jogada in arquivo:
         if not finalizado:
-            jogada = formatar_entrada(jogada)
+            jogada = form_e_verif_entrada(jogada)
         
             if eh_arquivo_pistas:
-                if verificar_jogada(jogada)[0]:
+                if jogada[0] == 0:
                     registrar_acao(jogada)
                     coluna, linha = jogada[0], jogada[1]
                     eh_pista[linha][coluna] = True
                 else:
-                    exibir_erro(verificar_jogada(jogada)[1])
+                    exibir_erro((-1 * jogada[0]) - 1)
                     finalizado = True
            
 # Função principal
@@ -65,14 +65,13 @@ def executar_interativo():
     saida_grade(matriz)
 
     while not finalizado:
-        j = formatar_entrada(input("Insira sua ação: "))
-        jogada_valida = verificar_jogada(j)
+        jogada = form_e_verif_entrada(input("Insira sua ação: "))
         
-        if jogada_valida[0]:
+        if jogada_valida[0] == 0:
           registrar_acao(j)
           saida_grade(matriz)
         else:
-          exibir_erro(jogada_valida[1])
+          exibir_erro((-1 * jogada_valida[0]) - 1)
 
 def apagar_numero(coluna, linha):
     numero = matriz[linha][coluna]
@@ -127,50 +126,65 @@ def inserir_numero(coluna, linha, numero):
         num_pres_coluna[coluna][numero - 1] = True
         num_pres_quadrante[quadrante][numero - 1] = True
 
-def formatar_entrada(entrada):
-  entrada = entrada.replace(" ","").strip().upper()
 
-  if "?" in entrada:
-    coluna, linha = entrada.replace("?","").split(",")
-    numero = "?"
-  elif "!" in entrada:
-    coluna, linha = entrada.replace("!","").split(",")
-    numero = "!"
-  else:
-    entrada, numero = entrada.split(":")
-    coluna, linha = entrada.split(",")
-  
-  linha = int(linha) - 1
-  coluna = ord(coluna) - 65
-  return [coluna, linha, numero]
+def form_e_verif_entrada(entr):
+    entr = formatacao(entr)
+    if entr[0] == -7:
+        return entr
+    else:
+        return verificar_jogada(entr)
+      
+
+def formatacao(entrada):
+    try:
+        entrada = entrada.replace(" ","").strip().upper()
+        if "?" in entrada:
+            coluna, linha = entrada.replace("?","").split(",")
+            conteudo = "?"
+        elif "!" in entrada:
+            coluna, linha = entrada.replace("!","").split(",")
+            conteudo = "!"
+        else:
+            entrada, conteudo = entrada.split(":")
+            coluna, linha = entrada.split(",")
+            conteudo = int(conteudo)
+        
+        # permite a ordem da linha e coluna de qualquer forma 
+        if not linha.isnumeric():
+            linha, coluna = coluna, linha
+        linha = int(linha) - 1
+        coluna = ord(coluna) - 65
+        
+        if coluna < 0 or coluna > 25:
+            return[-7]
+    except ValueError:
+        return[-7]
+    return[coluna, linha, conteudo]
+
 
 def verificar_jogada(entrada_div):
     coluna, linha, conteudo = entrada_div
 
-    valida = [True]
+    retorno = [coluna, linha, conteudo]
     
     if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
-        valida = [False, 0]
+        retorno = [-1]
     elif eh_pista[linha][coluna]:
-        valida = [False, 1]
+        retorno = [-2]
     elif conteudo == '?':
       if matriz[linha][coluna] != " ":
-        valida = [False, 2]
+        retorno = [-3]
     elif conteudo == '!':
         if matriz[linha][coluna] == " ":
-            valida = [False, 3]
+            retorno = [-4]
     else:
-        try:
-            conteudo = int(conteudo) - 1
-            quadrante = coluna // 3 + 3 * (linha // 3)
-            if conteudo < 0 or conteudo > 8:
-                valida = [False, 4]
-            elif num_pres_linha[linha][conteudo] or num_pres_coluna[coluna][conteudo] or num_pres_quadrante[quadrante][conteudo]:
-                valida = [False, 5]
-        except ValueError:
-            return valida
-    
-    return valida
+        conteudo = int(conteudo) - 1
+        quadrante = coluna // 3 + 3 * (linha // 3)
+        if conteudo < 0 or conteudo > 8:
+            retorno = [-5]
+        elif num_pres_linha[linha][conteudo] or num_pres_coluna[coluna][conteudo] or num_pres_quadrante[quadrante][conteudo]:
+            retorno = [-6]
+    return retorno
 
 def registrar_acao(acao):
     coluna, linha, conteudo = acao
