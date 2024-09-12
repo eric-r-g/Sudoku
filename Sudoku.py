@@ -19,27 +19,34 @@ def obter_arquivo_str(i):
     with open(sys.argv[i], 'r') as file:
         return file.read()
 
-def registrar_acoes(arquivo, eh_arquivo_pistas, batch = False):
+def registrar_acoes(arquivo, eh_arquivo_pistas):
     global finalizado
     for jogada in arquivo:
         if not finalizado:
-            jogada = formatar_entrada(jogada)
+            if not batch:
+                jogada = form_e_verif_entrada(jogada)
+            else:
+                jogada = formatacao(jogada)
 
             if eh_arquivo_pistas and not batch:
-                if verificar_jogada(jogada)[0]:
+                if jogada[0] >= 0:
                     registrar_acao(jogada)
                     coluna, linha = jogada[0], jogada[1]
                     eh_pista[linha][coluna] = True
                 else:
-                    exibir_erro(verificar_jogada(jogada)[1])
+                    exibir_erro((jogada[0]))
                     finalizado = True
-            elif eh_arquivo_pistas:
+            elif eh_arquivo_pistas and batch:
                 # A verificação das pistas do batch é diferente então estão sendo feitas no próprio executar_batch
-                registrar_acao(jogada)
-                coluna, linha = jogada[0], jogada[1]
-                eh_pista[linha][coluna] = True
+                verificacao = verificar_jogada(jogada)[0]
+                if verificacao >= 0 or verificacao == -6 or verificacao == -2:
+                    registrar_acao(jogada)
+                    coluna, linha = jogada[0], jogada[1]
+                    eh_pista[linha][coluna] = True
+                else:
+                    finalizado = True
             elif batch:
-                if verificar_jogada(jogada)[0]:
+                if jogada[0] != -7 and verificar_jogada(jogada)[0] >= 0:
                     registrar_acao(jogada)
                 else:
                     print('A jogada ('+chr(jogada[0]+65)+','+str(jogada[1]+1)+') = '+str(jogada[2])+' eh invalida!')
@@ -74,11 +81,11 @@ def executar_batch():
                 pista2  = pista2.replace(" ", "").strip().upper().split(":")
                 if pista1[0] == pista2[0] and pista1[1] != pista2[1]: 
                     invalida = True
-                
-    if not invalida:
-        registrar_acoes(pistas_arquivo, True, True)
+    
+    registrar_acoes(pistas_arquivo, True)            
+    if not invalida and not finalizado:
         jogadas_arquivo = obter_arquivo(2)
-        registrar_acoes(jogadas_arquivo, False, True)
+        registrar_acoes(jogadas_arquivo, False)
         if finalizado:
             print('A grade foi preenchida com sucesso!')
         else:
@@ -88,37 +95,38 @@ def executar_batch():
 
 def exibir_erro(codigo):
     erros = {
-        0: "msg 1",
-        1: "msg 2",
-        2: "msg 3",
-        3: "msg 4",
-        4: "msg 5",
-        5: "msg 6"
+        -1: "msg 1",
+        -2: "msg 2",
+        -3: "msg 3",
+        -4: "msg 4",
+        -5: "msg 5",
+        -6: "msg 6",
+        -7: "msg 7"
     }
     
     if codigo in erros:
         print(erros[codigo])
 
 def executar_interativo():
+    global finalizado
     pistas_arquivo = obter_arquivo(1)
     registrar_acoes(pistas_arquivo, True)
 
-    saida_grade(matriz)
-
     quantidade_pistas = len(pistas_arquivo)
     if quantidade_pistas < 1 or quantidade_pistas > 80:
-        print('Número inválido de pistas: '+quantidade_pistas)
+        print('Número inválido de pistas')
         finalizado = True
+    elif not finalizado:
+       saida_grade(matriz)
 
     while not finalizado:
-        j = formatar_entrada(input("Insira sua ação: "))
-        jogada_valida = verificar_jogada(j)
+        jogada = form_e_verif_entrada(input("Insira sua ação: "))
         
-        if jogada_valida[0]:
-          registrar_acao(j)
+        if jogada[0] >= 0:
+          registrar_acao(jogada)
           saida_grade(matriz)
         else:
-          exibir_erro(jogada_valida[1])
+          exibir_erro((jogada[0]))
 
 def apagar_numero(coluna, linha):
     numero = matriz[linha][coluna]
@@ -161,7 +169,7 @@ def inserir_numero(coluna, linha, numero):
     quadrante = coluna // 3 + 3 * (linha // 3)
     if num_anterior != ' ' and not batch:
         num_anterior = int(num_anterior) - 1
-        substituir = input("Já há um número nessa posição, deseja substituir? (Digite sim caso queira): ").upper()
+        substituir = input("Já há um número nessa posição, deseja substituir? (Digite sim caso queira): ").strip().upper()
         if substituir == "SIM":
             num_pres_linha[linha][num_anterior] = False
             num_pres_coluna[coluna][num_anterior] = False
@@ -173,50 +181,61 @@ def inserir_numero(coluna, linha, numero):
         num_pres_coluna[coluna][numero - 1] = True
         num_pres_quadrante[quadrante][numero - 1] = True
 
-def formatar_entrada(entrada):
-  entrada = entrada.replace(" ","").strip().upper()
+def form_e_verif_entrada(entr):
+    entr = formatacao(entr)
+    if entr[0] == -7:
+        return entr
+    else:
+        return verificar_jogada(entr)
 
-  if "?" in entrada:
-    coluna, linha = entrada.replace("?","").split(",")
-    numero = "?"
-  elif "!" in entrada:
-    coluna, linha = entrada.replace("!","").split(",")
-    numero = "!"
-  else:
-    entrada, numero = entrada.split(":")
-    coluna, linha = entrada.split(",")
-  
-  linha = int(linha) - 1
-  coluna = ord(coluna) - 65
-  return [coluna, linha, numero]
+def formatacao(entrada):
+    try:
+        entrada = entrada.replace(" ","").strip().upper()
+        if "?" in entrada:
+            coluna, linha = entrada.replace("?","").split(",")
+            conteudo = "?"
+        elif "!" in entrada:
+            coluna, linha = entrada.replace("!","").split(",")
+            conteudo = "!"
+        else:
+            entrada, conteudo = entrada.split(":")
+            coluna, linha = entrada.split(",")
+
+        # permite a ordem da linha e coluna de qualquer forma 
+        if not linha.isnumeric():
+            linha, coluna = coluna, linha
+        linha = int(linha) - 1
+        coluna = ord(coluna) - 65
+
+        if coluna < 0 or coluna > 25:
+            return[-7]
+    except ValueError:
+        return[-7]
+    return[coluna, linha, conteudo]
 
 def verificar_jogada(entrada_div):
     coluna, linha, conteudo = entrada_div
 
-    valida = [True]
+    retorno = [coluna, linha, conteudo]
     
     if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
-        valida = [False, 0]
+        retorno = [-1]
     elif eh_pista[linha][coluna]:
-        valida = [False, 1]
+        retorno = [-2]
     elif conteudo == '?':
       if matriz[linha][coluna] != " ":
-        valida = [False, 2]
+        retorno = [-3]
     elif conteudo == '!':
         if matriz[linha][coluna] == " ":
-            valida = [False, 3]
+            retorno = [-4]
     else:
-        try:
-            conteudo = int(conteudo) - 1
-            quadrante = coluna // 3 + 3 * (linha // 3)
-            if conteudo < 0 or conteudo > 8:
-                valida = [False, 4]
-            elif num_pres_linha[linha][conteudo] or num_pres_coluna[coluna][conteudo] or num_pres_quadrante[quadrante][conteudo]:
-                valida = [False, 5]
-        except ValueError:
-            return valida
-    
-    return valida
+        conteudo = int(conteudo) - 1
+        quadrante = coluna // 3 + 3 * (linha // 3)
+        if conteudo < 0 or conteudo > 8:
+            retorno = [-5]
+        elif (num_pres_linha[linha][conteudo] or num_pres_coluna[coluna][conteudo] or num_pres_quadrante[quadrante][conteudo]):
+            retorno = [-6]
+    return retorno
 
 def registrar_acao(acao):
     coluna, linha, conteudo = acao
