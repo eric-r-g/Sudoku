@@ -233,8 +233,6 @@ def verificar_jogada(sudoku, entrada_formatada):
 
         quadrante = coluna // 3 + 3 * (linha // 3)
 
-        print(f"l: {linha}, c: {coluna}, conteudo: {conteudo}")
-
         if conteudo < 0 or conteudo > 9:
             jogada_dados = [5]
         elif sudoku.existe_numero_presente("linha", linha, conteudo) or sudoku.existe_numero_presente("coluna", coluna, conteudo) or sudoku.existe_numero_presente("quadrante", quadrante, conteudo):
