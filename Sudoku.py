@@ -180,13 +180,13 @@ def inserir_numero(coluna, linha, numero):
         num_pres_linha[linha][numero - 1] = True
         num_pres_coluna[coluna][numero - 1] = True
         num_pres_quadrante[quadrante][numero - 1] = True
-
-def form_e_verif_entrada(entr):
+# Opção de passar a matriz e etc, isso porque essa função tá sendo usada em interface.py, que usa uma matriz diferente
+def form_e_verif_entrada(entr, matriz = matriz, eh_pista = eh_pista, num_pres_linha = num_pres_linha, num_pres_coluna = num_pres_coluna, num_pres_quadrante = num_pres_quadrante):
     entr = formatacao(entr)
     if entr[0] == -7:
         return entr
     else:
-        return verificar_jogada(entr)
+        return verificar_jogada(entr, matriz, eh_pista, num_pres_linha, num_pres_coluna, num_pres_quadrante)
 
 def formatacao(entrada):
     try:
@@ -213,7 +213,7 @@ def formatacao(entrada):
         return[-7]
     return[coluna, linha, conteudo]
 
-def verificar_jogada(entrada_div):
+def verificar_jogada(entrada_div, matriz, eh_pista, num_pres_linha, num_pres_coluna, num_pres_quadrante):
     coluna, linha, conteudo = entrada_div
 
     retorno = [coluna, linha, conteudo]
