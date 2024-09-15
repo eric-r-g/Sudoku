@@ -1,9 +1,67 @@
 import sys
 
+
 from Classe import Sudoku
 from validacao import validar_entrada, formatar, verificar_jogada, exibir_erro
 
-sudoku = Sudoku()
+# Função principal
+def iniciar(modo):
+    sudoku = Sudoku()
+
+    modos = {
+        1: executar_interativo,
+        2: executar_batch
+    }
+    
+    if modo in modos and not sudoku.finalizado:
+        modos[modo](sudoku)
+
+def executar_interativo(sudoku):
+    pistas_arquivo = obter_arquivo(1)
+    registrar_acoes(sudoku, pistas_arquivo, True)
+
+    sudoku.exibir_grade()
+
+    while not sudoku.finalizado:
+        acao = input("Insira sua ação: ")
+        jogada = validar_entrada(sudoku, acao)
+        
+        if jogada != None and len(jogada) == 3:
+          registrar_acao(sudoku, jogada)
+          sudoku.exibir_grade()
+        elif jogada != None:
+            exibir_erro(jogada[0], acao)
+        if sudoku.celulas_preenchidas == 81:
+            sudoku.finalizado = True
+
+def executar_batch(sudoku):
+    global batch
+    batch = True    
+
+    pistas_arquivo = obter_arquivo(1)
+    pistas_str = obter_arquivo_str(1).replace(" ", "").strip().upper()
+
+    invalida = False
+    if len(pistas_arquivo) < 1 or len(pistas_arquivo) > 80:
+        invalida = True
+    for pista1 in pistas_arquivo:
+        pista1 = pista1.replace(" ", "").strip().upper().split(":")
+        if pistas_str.count(pista1[0]) > 1:
+            for pista2 in pistas_arquivo:
+                pista2  = pista2.replace(" ", "").strip().upper().split(":")
+                if pista1[0] == pista2[0] and pista1[1] != pista2[1]: 
+                    invalida = True
+    
+    registrar_acoes(sudoku, pistas_arquivo, True, True)            
+    if not invalida and not sudoku.finalizado:
+        jogadas_arquivo = obter_arquivo(2)
+        registrar_acoes(sudoku, jogadas_arquivo, False, True)
+        if sudoku.finalizado:
+            print('A grade foi preenchida com sucesso!')
+        else:
+            print('A grade nao foi preenchida!')
+    else:
+        print('Configuracao de dicas invalida.')
 
 
 def obter_arquivo(i):
@@ -42,64 +100,7 @@ def registrar_acoes(sudoku, arquivo, arquivo_pista=False, batch = False):
                     jogada_validada = formatar(jogada)
                     print('A jogada ('+chr(jogada_validada[0]+65)+','+str(jogada_validada[1]+1)+') = '+str(jogada_validada[2])+' eh invalida!')
            
-# Função principal
-def iniciar(modo):
-    sudoku = Sudoku()
 
-    modos = {
-        1: executar_interativo,
-        2: executar_batch
-    }
-    
-    if modo in modos and not sudoku.finalizado:
-        modos[modo](sudoku)
-
-def executar_batch(sudoku):
-    global batch
-    batch = True    
-
-    pistas_arquivo = obter_arquivo(1)
-    pistas_str = obter_arquivo_str(1).replace(" ", "").strip().upper()
-
-    invalida = False
-    if len(pistas_arquivo) < 1 or len(pistas_arquivo) > 80:
-        invalida = True
-    for pista1 in pistas_arquivo:
-        pista1 = pista1.replace(" ", "").strip().upper().split(":")
-        if pistas_str.count(pista1[0]) > 1:
-            for pista2 in pistas_arquivo:
-                pista2  = pista2.replace(" ", "").strip().upper().split(":")
-                if pista1[0] == pista2[0] and pista1[1] != pista2[1]: 
-                    invalida = True
-    
-    registrar_acoes(sudoku, pistas_arquivo, True, True)            
-    if not invalida and not sudoku.finalizado:
-        jogadas_arquivo = obter_arquivo(2)
-        registrar_acoes(sudoku, jogadas_arquivo, False, True)
-        if sudoku.finalizado:
-            print('A grade foi preenchida com sucesso!')
-        else:
-            print('A grade nao foi preenchida!')
-    else:
-        print('Configuracao de dicas invalida.')
-
-def executar_interativo(sudoku):
-    pistas_arquivo = obter_arquivo(1)
-    registrar_acoes(sudoku, pistas_arquivo, True)
-
-    sudoku.exibir_grade()
-
-    while not sudoku.finalizado:
-        acao = input("Insira sua ação: ")
-        jogada = validar_entrada(sudoku, acao)
-        
-        if jogada != None and len(jogada) == 3:
-          registrar_acao(sudoku, jogada)
-          sudoku.exibir_grade()
-        elif jogada != None:
-            exibir_erro(jogada[0], acao)
-        if sudoku.celulas_preenchidas == 81:
-            sudoku.finalizado = True
 
 def registrar_acao(sudoku, acao):
     coluna, linha, conteudo = acao
@@ -117,6 +118,8 @@ def registrar_acao(sudoku, acao):
     except ValueError:
         if conteudo in acoes:
             acoes[conteudo](coluna, linha)
+
+
 
 
 # Inicialização e entrada de dados
