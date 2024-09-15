@@ -1,7 +1,7 @@
 import sys
 
 from Classe import Sudoku
-from Sudoku import validar_entrada, formatar, verificar_jogada, exibir_erro
+from validacao import validar_entrada, formatar, verificar_jogada, exibir_erro
 
 sudoku = Sudoku()
 
