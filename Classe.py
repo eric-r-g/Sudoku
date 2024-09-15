@@ -6,6 +6,7 @@ class Sudoku:
         self.grade = [[0 for _ in range(9)] for _ in range(9)]
         self.pistas = [[False for _ in range(9)] for _ in range(9)]
         self.finalizado = False
+        self.celulas_preenchidas = 0
     
     # Função para inserir um número dentro da grade.
     def inserir_numero(self, coluna, linha, numero):
@@ -20,6 +21,7 @@ class Sudoku:
             # Caso o usuário digite outra coisa, o código irá prosseguir normalmente.
         else:
             self.grade[linha][coluna] = numero
+            self.celulas_preenchidas += 1
 
     # Função responsável por apagar um número da grade.
     def apagar_numero(self, coluna, linha): 
@@ -29,6 +31,7 @@ class Sudoku:
             exibir_erro(2)
         else:
             self.grade[linha][coluna] = 0
+            self.celulas_preenchidas -= 1
 
     def existe_numero_presente(self, local, i, numero):
         # Analisa em uma coluna ou linha.
@@ -108,11 +111,11 @@ def exibir_erro(codigo, entrada=None):
         entrada = entrada.replace("\n", "").strip()
     
     erros = {
-        1: "msg 1",
+        1: "a linha ou a coluna está fora do alcance",
         2: "Você não pode interagir com uma pista.",
-        3: "msg 3",
+        3: "Você não pode ver as possibilidades de uma posição já preenchida",
         4: "msg 4",
-        5: "msg 5",
+        5: "O número precisa ser de 1 a 9",
         6: f"A jogada {entrada} não é possível",
         7: f"A jogada {entrada} eh invalida",
         8: "O número inserido é inválido.",
@@ -214,6 +217,8 @@ def executar_interativo(sudoku):
           sudoku.exibir_grade()
         elif jogada != None:
             exibir_erro(jogada[0], acao)
+        if sudoku.celulas_preenchidas == 81:
+            sudoku.finalizado = True
 
 def validar_entrada(sudoku, entrada):
     if formatar(entrada) == None:
