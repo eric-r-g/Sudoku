@@ -10,7 +10,7 @@ class Sudoku:
     # Função para inserir um número dentro da grade.
     def inserir_numero(self, coluna, linha, numero):
         numero_atual = self.grade[linha][coluna]
-
+        
         if self.pistas[linha][coluna]:
             exibir_erro(2)
         elif numero_atual != 0:
@@ -22,7 +22,7 @@ class Sudoku:
             self.grade[linha][coluna] = numero
 
     # Função responsável por apagar um número da grade.
-    def apagar_numero(self, coluna, linha, numero):
+    def apagar_numero(self, coluna, linha): 
         if self.grade[linha][coluna] == 0:
             exibir_erro(9)
         elif self.pistas[linha][coluna]:
@@ -106,7 +106,7 @@ def exibir_erro(codigo, entrada=None):
 
     if entrada != None:
         entrada = entrada.replace("\n", "").strip()
-
+    
     erros = {
         1: "msg 1",
         2: "Você não pode interagir com uma pista.",
@@ -114,7 +114,7 @@ def exibir_erro(codigo, entrada=None):
         4: "msg 4",
         5: "msg 5",
         6: f"A jogada {entrada} não é possível",
-        7: "A jogada " + entrada + " eh invalida",
+        7: f"A jogada {entrada} eh invalida",
         8: "O número inserido é inválido.",
         9: "Não existe nada para ser apagado na posição solicitada."
     }
@@ -125,29 +125,43 @@ def exibir_erro(codigo, entrada=None):
 def obter_arquivo(i):
   with open(sys.argv[i], 'r') as file:
     return file.readlines()
+def obter_arquivo_str(i):
+    with open(sys.argv[i], 'r') as file:
+        return file.read()
 
-def registrar_acoes(sudoku, arquivo, arquivo_pista=False):
+def registrar_acoes(sudoku, arquivo, arquivo_pista=False, batch = False):
     for jogada in arquivo:
         if not sudoku.finalizado:
             jogada_validada = validar_entrada(sudoku, jogada)
-
-            if jogada_validada != None and arquivo_pista and len(jogada_validada) == 3:
-                registrar_acao(sudoku, jogada_validada)
-
-                coluna, linha = jogada_validada[0], jogada_validada[1]
-                sudoku.pistas[linha][coluna] = True
+            
+            if arquivo_pista and not batch:
+                if jogada_validada != None and arquivo_pista and len(jogada_validada) == 3:
+                    registrar_acao(sudoku, jogada_validada)
+                    
+                    coluna, linha = jogada_validada[0], jogada_validada[1]
+                    sudoku.pistas[linha][coluna] = True
+                else:
+                    print("erro tipo " + str(jogada_validada[0]))
+                    exibir_erro(jogada_validada[0], jogada)
+                    sudoku.finalizado = True
+            elif arquivo_pista and batch:
+                if (jogada_validada != None and arquivo_pista) or jogada_validada[0] == 2 or jogada_validada[0] == 6:
+                    if len(jogada_validada) == 3:
+                        registrar_acao(sudoku, jogada_validada)
+                        coluna, linha = jogada_validada[0], jogada_validada[1]
+                        sudoku.pistas[linha][coluna] = True
+            # Caso seja batch fazer a formatação especifíca que ele pediu:
             else:
-                print("erro tipo " + str(jogada_validada[0]))
-                exibir_erro(jogada_validada[0], jogada)
-                sudoku.finalizado = True
+                if jogada_validada != None and len(jogada_validada) == 3:
+                    registrar_acao(sudoku, jogada_validada)
+                else:
+                    jogada_validada = formatar(jogada)
+                    print('A jogada ('+chr(jogada_validada[0]+65)+','+str(jogada_validada[1]+1)+') = '+str(jogada_validada[2])+' eh invalida!')
            
 # Função principal
 def iniciar(modo):
     sudoku = Sudoku()
 
-    pistas_arquivo = obter_arquivo(1)
-    registrar_acoes(sudoku, pistas_arquivo, True)
-    	
     modos = {
         1: executar_interativo,
         2: executar_batch
@@ -157,12 +171,38 @@ def iniciar(modo):
         modos[modo](sudoku)
 
 def executar_batch(sudoku):
-    jogadas_arquivo = obter_arquivo(2)
-    registrar_acoes(jogadas_arquivo, False)
+    global batch
+    batch = True    
 
-    sudoku.exibir_grade()
+    pistas_arquivo = obter_arquivo(1)
+    pistas_str = obter_arquivo_str(1).replace(" ", "").strip().upper()
+
+    invalida = False
+    if len(pistas_arquivo) < 1 or len(pistas_arquivo) > 80:
+        invalida = True
+    for pista1 in pistas_arquivo:
+        pista1 = pista1.replace(" ", "").strip().upper().split(":")
+        if pistas_str.count(pista1[0]) > 1:
+            for pista2 in pistas_arquivo:
+                pista2  = pista2.replace(" ", "").strip().upper().split(":")
+                if pista1[0] == pista2[0] and pista1[1] != pista2[1]: 
+                    invalida = True
+    
+    registrar_acoes(sudoku, pistas_arquivo, True, True)            
+    if not invalida and not sudoku.finalizado:
+        jogadas_arquivo = obter_arquivo(2)
+        registrar_acoes(sudoku, jogadas_arquivo, False, True)
+        if sudoku.finalizado:
+            print('A grade foi preenchida com sucesso!')
+        else:
+            print('A grade nao foi preenchida!')
+    else:
+        print('Configuracao de dicas invalida.')
 
 def executar_interativo(sudoku):
+    pistas_arquivo = obter_arquivo(1)
+    registrar_acoes(sudoku, pistas_arquivo, True)
+
     sudoku.exibir_grade()
 
     while not sudoku.finalizado:
@@ -215,7 +255,6 @@ def formatar(entrada):
 def verificar_jogada(sudoku, entrada_formatada):
     coluna, linha, conteudo = entrada_formatada
 
-    print(f"c: {[coluna, linha, conteudo]}")
     jogada_dados = [coluna, linha, conteudo]
     
     if linha < 0 or linha > 8 or coluna < 0 or coluna > 8:
