@@ -13,9 +13,8 @@ import Classe as sdk
 class Sudoku_interface(sdk.Sudoku):
     def __init__(self):
         super().__init__()
-        self.grade = [[0 for _ in range(9)] for _ in range(9)]
         self.grade_str = [[tk.StringVar(value="   ") for _ in range(9)] for _ in range(9)]
-        self.celulas_preenchidas = 0
+        self.grade_label = [[None for _ in range(9)] for _ in range(9)]
     
     def inserir_numero(self, coluna, linha, numero):
         numero = int(numero)
@@ -26,6 +25,9 @@ class Sudoku_interface(sdk.Sudoku):
             self.grade[linha][coluna] = numero
             self.grade_str[linha][coluna].set(" "+str(numero))
             self.celulas_preenchidas += 1
+            if sudoku.celulas_preenchidas == 81 or sudoku.finalizado:
+                sudoku.finalizado = True
+                output('Parabéns! Você completou o sudoku')
 
     def apagar_numero(self, coluna, linha):
         if self.grade[linha][coluna] == 0:
@@ -63,22 +65,30 @@ qntd_outputs = tk.IntVar(value=0)
 input_text = tk.StringVar()
 file_text = tk.StringVar()
 output_str = tk.StringVar(value="Insira o caminho de um arquivo na entrada inferior")
-
+batch = tk.BooleanVar(False)
 
 # ========= Criação e configuração dos frames e widgets do programa ========= #
-
-title_frame = tk.Frame(root, bg="blue")
+title_frame = tk.Frame(root, bg="#5432a8")
 title_frame.pack(side="top", fill="both")
 tk.Label(title_frame, text="SUDOKU").pack(expand=True)
 
 # Alguns frames usados para posicionar a grade no centro da tela
-sudoku_frame = tk.Frame(root, bg="green")
+sudoku_frame = tk.Frame(root)
 sudoku_frame.pack(side="top", fill="both")
-table_frame = tk.Frame(sudoku_frame)
-table_frame.pack(expand=True)
+#table_frame = tk.Frame(sudoku_frame)
+#table_frame.pack()
+logo = tk.PhotoImage(file="images.pgm")
+label_img = tk.Label(sudoku_frame, image=logo)
+label_img.pack(expand=True, fill="both")
 
-entry_frame = tk.Frame(root, bg="red", )
+entry_frame = tk.Frame(root, bg="#3f2580")
 entry_frame.pack(side="top", fill="both")
+
+options_frame = tk.Frame(sudoku_frame, bg="yellow")
+options_frame.place(relx=0.85, rely=0.05)
+
+tk.Label(options_frame, text="Opções").pack(side="top")
+tk.Checkbutton(options_frame, variable=)
 
 input_entry = tk.Entry(entry_frame, textvariable=input_text)
 tk.Label(entry_frame, text="Insira suas jogadas aqui").pack(side="top")
@@ -140,13 +150,14 @@ def registrar_pistas(evento):
             file_text.set("")
             invalida = False
             for pista in pistas:
-                pista_form = validar_entrada(sudoku, pista)
+                pista_form = sdk.validar_entrada(sudoku, pista)
+                coluna, linha, numero = pista_form
                 if pista_form != None and len(pista_form) == 3 and not invalida:
-                    coluna, linha, numero = pista_form
                     sudoku.inserir_numero(coluna, linha, numero)
                     sudoku.pistas[pista_form[1]][pista_form[0]] = True
                 else:
                     invalida = True
+                sudoku.grade_label[linha][coluna].configure(fg="red")
             if invalida:
                 output("Configuração inválida")
             else:    
@@ -163,9 +174,7 @@ def inserir_teclado(evento):
     if jogada != None and len(jogada) == 3 and not sudoku.finalizado:
         sdk.registrar_acao(sudoku, jogada)
         input_text.set("")
-    elif sudoku.celulas_preenchidas == 81 or sudoku.finalizado:
-        sudoku.finalizado = True
-        output('Parabéns! Você completou o sudoku')
+
     else:
         exibir_erro(jogada[0], entrada)
 
@@ -181,7 +190,6 @@ def handle_click(evento):
             if jogada != None and len(jogada) == 3:
                 sdk.registrar_acao(sudoku, jogada)
                 input_text.set("")
-                print(sudoku.celulas_preenchidas)
             elif sudoku.celulas_preenchidas == 81 or sudoku.finalizado:
                 sudoku.finalizado = True
                 output('Parabéns! Você completou o sudoku')
@@ -219,17 +227,21 @@ def foco_file(evento):
 # Criação da grade do sudoku na janela
 for coluna in range(9):
     for linha in range(9):
-        cell = tk.Label(table_frame, textvariable=sudoku.grade_str[linha][coluna], borderwidth=1, relief="solid", padx=2, pady=2)
+        cell = tk.Label(label_img, textvariable=sudoku.grade_str[linha][coluna], borderwidth=1, relief="solid", padx=2, pady=2)
         cell.grid(column=coluna, row=linha+2, sticky=tk.N)
         cell.linha = linha
         cell.coluna = coluna
         cell.conteudo = sudoku.grade_str[linha][coluna]
         cell.bind('<Button-1>',handle_click)
+        sudoku.grade_label[linha][coluna] = cell
 
 # Eventos de teclado do programa
 input_entry.bind('<FocusIn>', foco_entrada)
 file_entry.bind('<FocusIn>', foco_file)
 root.bind('<Return>', inserir_teclado)
 
+def iniciar():
 # Iniciar o programa
-root.mainloop()
+    root.mainloop()
+iniciar()
+
