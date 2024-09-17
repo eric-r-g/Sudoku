@@ -22,6 +22,7 @@ class Sudoku:
         else:
             self.grade[linha][coluna] = numero
             self.celulas_preenchidas += 1
+        if self.celulas_preenchidas == 81: self.finalizado = True
 
     # Função responsável por apagar um número da grade.
     def apagar_numero(self, coluna, linha): 
@@ -32,6 +33,7 @@ class Sudoku:
         else:
             self.grade[linha][coluna] = 0
             self.celulas_preenchidas -= 1
+        if self.celulas_preenchidas < 81: self.finalizado = False
 
     def existe_numero_presente(self, local, i, numero):
         # Analisa em uma coluna ou linha.
