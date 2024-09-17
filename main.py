@@ -21,12 +21,14 @@ def executar_interativo(sudoku):
     registrar_acoes(sudoku, pistas_arquivo, True)
 
     sudoku.exibir_grade()
-
+    if len(pistas_arquivo) < 1 or len(pistas_arquivo) > 80:
+        sudoku.finalizado = True
+        print("Configuracao de dicas invalida")
     while not sudoku.finalizado:
         acao = input("Insira sua ação: ")
         jogada = validar_entrada(sudoku, acao)
         
-        if jogada != None and len(jogada) == 3:
+        if jogada != None and len(jogada) == 3: 
           registrar_acao(sudoku, jogada)
           sudoku.exibir_grade()
         elif jogada != None:
@@ -60,7 +62,7 @@ def executar_batch(sudoku):
             print('A grade foi preenchida com sucesso!')
         else:
             print('A grade nao foi preenchida!')
-    else:
+    elif:
         print('Configuracao de dicas invalida.')
 
 
@@ -92,6 +94,10 @@ def registrar_acoes(sudoku, arquivo, arquivo_pista=False, batch = False):
                         registrar_acao(sudoku, jogada_validada)
                         coluna, linha = jogada_validada[0], jogada_validada[1]
                         sudoku.pistas[linha][coluna] = True
+                    else:
+                        print('Configuracao de dicas invalida.')
+                else:
+                    print('Configuracao de dicas invalida.')        
             # Caso seja batch fazer a formatação especifíca que ele pediu:
             else:
                 if jogada_validada != None and len(jogada_validada) == 3:
