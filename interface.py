@@ -12,10 +12,12 @@ class Sudoku_interface(Sudoku):
         super().__init__()
         self.grade_str = [[tk.StringVar(value="    ") for _ in range(9)] for _ in range(9)]
         self.grade_label = [[None for _ in range(9)] for _ in range(9)]
-    
+
+    # função para ataualizar a vizualização da grade
     def atualizar_visualizacao(self, coluna, linha, numero = "  "):
         self.grade_str[linha][coluna].set(" "+str(numero)+" ")
 
+    # adaptação da função inserção para o tkinter
     def inserir_numero(self, coluna, linha, numero):
         numero = int(numero)
 
@@ -27,6 +29,7 @@ class Sudoku_interface(Sudoku):
             if self.celulas_preenchidas == 81 or self.finalizado:
                 self.finalizado = True
 
+    # adaptação da função de remorção para o tkinter
     def apagar_numero(self, coluna, linha):
         if self.grade[linha][coluna] == 0:
             exibir_erro(9)
@@ -37,7 +40,8 @@ class Sudoku_interface(Sudoku):
             self.celulas_preenchidas -= 1
         if self.celulas_preenchidas < 81:
             self.finalizado = False
-    
+
+    # adaptação da função de dica para o tkinter
     def obter_dica(self, coluna, linha):
         n_possiveis = self.verificar_possibilidades(coluna, linha)
 
@@ -46,6 +50,7 @@ class Sudoku_interface(Sudoku):
         else:
             output("Número(s) possiveis: " + ', '.join(map(str, n_possiveis)))
 
+    # função para resetar o jogo
     def clear(self):
         for coluna in range(9):
             for linha in range(9):
@@ -57,6 +62,7 @@ class Sudoku_interface(Sudoku):
         self.finalizado = False
         output("Jogo resetado")
 
+# função para obtenção de arquivo 
 def obter_arquivo(arquivo):
   with open(arquivo, 'r') as file:
     return file.readlines()
@@ -81,21 +87,22 @@ batch_anim = tk.BooleanVar(value=True)
 
 # ========= Funções principais do programa ========= #
 
+# adaptação para a função de erro
 def exibir_erro(codigo, entrada=None):
 
     if entrada != None:
         entrada = entrada.replace("\n", "").strip()
 
     erros = {
-        1: "a linha ou a coluna está fora do alcance",
-        2: "Você não pode interagir com uma pista.",
-        3: "Você não pode ver as possibilidades de uma posição já preenchida",
+        1: "a linha ou a coluna esta fora do alcance",
+        2: "Voce nao pode interagir com uma pista.",
+        3: "Voce nao pode ver as possibilidades de uma posicao ja preenchida",
         4: "msg 4",
-        5: "O número precisa ser de 1 a 9",
-        6: f"A jogada {entrada} não é possível",
+        5: "O numero precisa ser de 1 a 9",
+        6: f"A jogada {entrada} nao eh possivel",
         7: f"A jogada {entrada} eh invalida",
-        8: "O número inserido é inválido.",
-        9: "Não existe nada para ser apagado na posição solicitada."
+        8: "O numero inserido eh invalido.",
+        9: "Nao existe nada para ser apagado na posicao solicitada."
     }
     
     if abs(codigo) in erros:
@@ -112,6 +119,7 @@ def output(output):
         qntd_outputs.set(qntd_outputs.get() + 1)
         output_str.set(output+f'[{qntd_outputs.get()}]')
 
+# funcao para registras as pistas
 def registrar_pistas(evento):
     try:
         pistas = obter_arquivo(file_text.get())
@@ -132,7 +140,7 @@ def registrar_pistas(evento):
             else:    
                 output('Use a entrada superior ou clique em um espaço')
         else:
-            output("Quantidade inválida de pistas: "+str(qntd_pistas))
+            output("Quantidade invalida de pistas: "+str(qntd_pistas))
     except FileNotFoundError as erro:
         output(erro.strerror)
     file_text.set("")
@@ -150,7 +158,7 @@ def registrar_batch(evento):
             else:
                 if erros == 'nenhuma': erros = ''
                 erros = erros + entrada
-    saida = f'Jogadas invalidas: {erros}' + ("Parabéns! Você completou o sudoku" if sudoku.finalizado else "Você não completou o sudoku")
+    saida = f'Jogadas invalidas: {erros}' + ("Parabens! Você completou o sudoku" if sudoku.finalizado else "Voce nao completou o sudoku")
     if batch_anim.get(): entry_frame.after(100*len(entradas) ,output, saida)
     else: output(saida)
     batch_text.set('')
