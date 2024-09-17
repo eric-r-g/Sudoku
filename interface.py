@@ -2,14 +2,9 @@
 import tkinter as tk
 from Classe import Sudoku
 from validacao import validar_entrada
-from main import registrar_acao
 
 # https://tkdocs.com/shipman/tkinter.pdf documentação inteira do tkinter em pdf
 # https://tkdocs.com/shipman/index-2.html documentação no site
-
-# Problemas: 
-# Talvez o tamanho das coisas seja pequeno demais, e feio, não sei como melhorar ainda pelos menos
-# Separar os quadrantes talvez vá ser complicado, minha ideia é separar o grid em 9 partes e a cor de fundo é a separação, só teria que ver como posicionar isso com o tk
 
 # Classe herdada do programa principal
 class Sudoku_interface(Sudoku):
@@ -18,6 +13,9 @@ class Sudoku_interface(Sudoku):
         self.grade_str = [[tk.StringVar(value="    ") for _ in range(9)] for _ in range(9)]
         self.grade_label = [[None for _ in range(9)] for _ in range(9)]
     
+    def atualizar_visualizacao(self, coluna, linha, numero = "  "):
+        self.grade_str[linha][coluna].set(" "+str(numero)+" ")
+
     def inserir_numero(self, coluna, linha, numero):
         numero = int(numero)
 
@@ -25,11 +23,9 @@ class Sudoku_interface(Sudoku):
             exibir_erro(2)
         else:
             self.grade[linha][coluna] = numero
-            self.grade_str[linha][coluna].set(" "+str(numero)+" ")
             self.celulas_preenchidas += 1
             if self.celulas_preenchidas == 81 or self.finalizado:
                 self.finalizado = True
-                output('Parabéns! Você completou o sudoku')
 
     def apagar_numero(self, coluna, linha):
         if self.grade[linha][coluna] == 0:
@@ -38,8 +34,9 @@ class Sudoku_interface(Sudoku):
             exibir_erro(2)
         else:
             self.grade[linha][coluna] = 0
-            self.grade_str[linha][coluna].set("    ")
             self.celulas_preenchidas -= 1
+        if self.celulas_preenchidas < 81:
+            self.finalizado = False
     
     def obter_dica(self, coluna, linha):
         n_possiveis = self.verificar_possibilidades(coluna, linha)
@@ -48,12 +45,14 @@ class Sudoku_interface(Sudoku):
             output("Não possui números possiveis para essa posição.")
         else:
             output("Número(s) possiveis: " + ', '.join(map(str, n_possiveis)))
+
     def clear(self):
         for coluna in range(9):
             for linha in range(9):
                 self.grade[linha][coluna] = 0
                 self.pistas[linha][coluna] = False
                 self.grade_str[linha][coluna].set("    ")
+                sudoku.grade_label[linha][coluna].configure(fg="black")
         self.celulas_preenchidas = 0
         self.finalizado = False
         output("Jogo resetado")
@@ -123,8 +122,8 @@ def registrar_pistas(evento):
                 pista_form = validar_entrada(sudoku, pista)
                 coluna, linha, numero = pista_form
                 if pista_form != None and len(pista_form) == 3 and not invalida:
-                    sudoku.inserir_numero(coluna, linha, numero)
-                    sudoku.pistas[pista_form[1]][pista_form[0]] = True
+                    registrar_acao(pista_form)
+                    sudoku.pistas[linha][coluna] = True
                 else:
                     invalida = True
                 sudoku.grade_label[linha][coluna].configure(fg="red")
@@ -142,25 +141,57 @@ def registrar_batch(evento):
     if batch.get():
         entradas = obter_arquivo(batch_text.get())
         tempo = 0
+        erros = 'nenhuma'
         for entrada in entradas:
             tempo+=1
             jogada = validar_entrada(sudoku, entrada)
             if jogada != None and len(jogada) == 3:
-                if batch_anim.get(): sudoku.grade_label[jogada[1]][jogada[0]].after(100*tempo, registrar_acao, sudoku, jogada)
-                else: registrar_acao(sudoku, jogada)
-
+                registrar_acao (jogada, tempo*batch_anim.get())
+            else:
+                if erros == 'nenhuma': erros = ''
+                erros = erros + entrada
+    saida = f'Jogadas invalidas: {erros}' + ("Parabéns! Você completou o sudoku" if sudoku.finalizado else "Você não completou o sudoku")
+    if batch_anim.get(): entry_frame.after(100*len(entradas) ,output, saida)
+    else: output(saida)
     batch_text.set('')
+
+def registrar_acao(acao, tempo = 0):
+    coluna, linha, conteudo = acao
+
+    acoes = {
+        "!": sudoku.apagar_numero,
+        "?": sudoku.obter_dica
+    }
+
+    try:
+        # checa se é um número de 1-9
+        if 1 <= int(conteudo) <= 9:
+            sudoku.inserir_numero(coluna, linha, int(conteudo))
+            if tempo <= 0:
+                sudoku.atualizar_visualizacao(coluna, linha, int(conteudo))
+            else:
+                sudoku.grade_label[linha][coluna].after(100*tempo, sudoku.atualizar_visualizacao, coluna, linha, int(conteudo))
+    # se não for um número, vai tentar procurar uma ação com o conteudo da variável
+    except ValueError:
+        if conteudo in acoes:
+            acoes[conteudo](coluna, linha)
+            if tempo <= 0 and conteudo != "?":
+                sudoku.atualizar_visualizacao(coluna, linha)
+            elif conteudo != "?":
+                sudoku.grade_label[linha][coluna].after(100*tempo, sudoku.atualizar_visualizacao, coluna, linha)
+
 
 # Função intermediária de inserção para o teclado
 def inserir_teclado(evento):
     entrada = input_text.get()
     jogada = validar_entrada(sudoku, entrada)
     if jogada != None and len(jogada) == 3 and not sudoku.finalizado:
-        registrar_acao(sudoku, jogada)
+        registrar_acao(jogada)
         input_text.set("")
-
     else:
         exibir_erro(jogada[0], entrada)
+    if sudoku.finalizado:
+        output('Parabéns! Você completou o sudoku')
 
 # Função intermediária de controle dos eventos de mouse
 def handle_click(evento):
@@ -172,13 +203,12 @@ def handle_click(evento):
         def processo_insercao(entrada):
             jogada = validar_entrada(sudoku, entrada)
             if jogada != None and len(jogada) == 3:
-                registrar_acao(sudoku, jogada)
+                registrar_acao(jogada)
                 input_text.set("")
-            elif sudoku.celulas_preenchidas == 81 or sudoku.finalizado:
-                sudoku.finalizado = True
-                output('Parabéns! Você completou o sudoku')
             else:
                 exibir_erro(jogada[0], entrada)
+            if sudoku.finalizado:
+                output('Parabéns! Você completou o sudoku')
         digito = evento.keysym
         if digito != "0" and digito.isnumeric():
             entrada = f'{chr(widget.coluna+65)},{widget.linha+1}:{digito}'
@@ -281,4 +311,3 @@ def iniciar():
     iniciar_matriz()
     root.mainloop()
 iniciar()
-
