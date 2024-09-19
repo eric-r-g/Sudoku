@@ -7,6 +7,7 @@ import sys
 
 from Classe import Sudoku
 from validacao import validar_entrada, formatar, verificar_jogada, exibir_erro
+from interface import iniciar_interface
 
 # Função principal
 def iniciar(modo):
@@ -142,8 +143,8 @@ def registrar_acao(sudoku, acao):
 if len(sys.argv) < 2 or len(sys.argv) > 3:
   print("O numero de parametros enviados para executar o sudoku eh invalido.")
 else:
-    if sys.arqv == "interface:
-        # TODO: abrir modo interface
-        pass
-    modo = len(sys.argv) - 1
-    iniciar(modo)
+    if sys.argv[0] == "interface":
+        iniciar_interface()
+    else:
+        modo = len(sys.argv) - 1
+        iniciar(modo)
