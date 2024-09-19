@@ -85,7 +85,7 @@ class Sudoku:
         else:
             print("Numero(s) possiveis: " + ', '.join(map(str, n_possiveis)))
 
-    função para exibir a grade do jogo
+    # função para exibir a grade do jogo
     def exibir_grade(self):
         fil_padrao = [
             "    A   B   C    D   E   F    G   H   I",
