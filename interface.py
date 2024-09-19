@@ -318,7 +318,7 @@ file_entry.bind('<FocusIn>', foco_file)
 root.bind('<Return>', inserir_teclado)
 
 # Iniciar o programa
-def iniciar():
+def iniciar_interface():
     iniciar_matriz()
     root.mainloop()
-iniciar()
+iniciar_interface()
