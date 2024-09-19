@@ -1,6 +1,6 @@
 # TRABALHO De FuP - SUDOKU
 # Eric Rodrigues Gomes - 564971
-#
+# João Ítalo de Almeida Campos - 567991
 #
 
 import sys
@@ -145,6 +145,7 @@ if len(sys.argv) < 2 or len(sys.argv) > 3:
 else:
     if sys.argv[1] == "interface":
         from interface import iniciar_interface
+        iniciar_interface()
     else:
         modo = len(sys.argv) - 1
         iniciar(modo)

@@ -13,11 +13,11 @@ class Sudoku_interface(Sudoku):
         self.grade_str = [[tk.StringVar(value="    ") for _ in range(9)] for _ in range(9)]
         self.grade_label = [[None for _ in range(9)] for _ in range(9)]
 
-    # função para ataualizar a vizualização da grade
+    # Função para atualizar a vizualização da grade
     def atualizar_visualizacao(self, coluna, linha, numero = "  "):
         self.grade_str[linha][coluna].set(" "+str(numero)+" ")
 
-    # adaptação da função inserção para o tkinter
+    # Adaptação da função inserção para o tkinter
     def inserir_numero(self, coluna, linha, numero):
         numero = int(numero)
 
@@ -29,7 +29,7 @@ class Sudoku_interface(Sudoku):
             if self.celulas_preenchidas == 81 or self.finalizado:
                 self.finalizado = True
 
-    # adaptação da função de remorção para o tkinter
+    # Adaptação da função de remoção para o tkinter
     def apagar_numero(self, coluna, linha):
         if self.grade[linha][coluna] == 0:
             exibir_erro(9)
@@ -41,7 +41,7 @@ class Sudoku_interface(Sudoku):
         if self.celulas_preenchidas < 81:
             self.finalizado = False
 
-    # adaptação da função de dica para o tkinter
+    # Adaptação da função de dica para o tkinter
     def obter_dica(self, coluna, linha):
         n_possiveis = self.verificar_possibilidades(coluna, linha)
 
@@ -50,7 +50,7 @@ class Sudoku_interface(Sudoku):
         else:
             output("Número(s) possiveis: " + ', '.join(map(str, n_possiveis)))
 
-    # função para resetar o jogo
+    # Função para resetar o jogo
     def clear(self):
         for coluna in range(9):
             for linha in range(9):
@@ -62,7 +62,7 @@ class Sudoku_interface(Sudoku):
         self.finalizado = False
         output("Jogo resetado")
 
-# função para obtenção de arquivo 
+# Função para obtenção de arquivo 
 def obter_arquivo(arquivo):
   with open(arquivo, 'r') as file:
     return file.readlines()
@@ -87,7 +87,7 @@ batch_anim = tk.BooleanVar(value=True)
 
 # ========= Funções principais do programa ========= #
 
-# adaptação para a função de erro
+# Adaptação para a função de erro
 def exibir_erro(codigo, entrada=None):
 
     if entrada != None:
@@ -119,7 +119,7 @@ def output(output):
         qntd_outputs.set(qntd_outputs.get() + 1)
         output_str.set(output+f'[{qntd_outputs.get()}]')
 
-# funcao para registras as pistas adaptada
+# Funcao para registrar as pistas, adaptada
 def registrar_pistas(evento):
     try:
         pistas = obter_arquivo(file_text.get())
@@ -145,12 +145,12 @@ def registrar_pistas(evento):
         output(erro.strerror)
     file_text.set("")
 
-# função para declarar o batch, adaptada
+# Função para registrar as jogadas do batch, adaptada
 def registrar_batch(evento):
     if batch.get():
         entradas = obter_arquivo(batch_text.get())
         tempo = 0
-        erros = 'nenhuma'
+        erros = 'nenhuma\n'
         for entrada in entradas:
             tempo+=1
             jogada = validar_entrada(sudoku, entrada)
@@ -164,7 +164,7 @@ def registrar_batch(evento):
     else: output(saida)
     batch_text.set('')
 
-# função para as ações, mas adaptadas
+# Função para registrar as ações, adaptadas
 def registrar_acao(acao, tempo = 0):
     coluna, linha, conteudo = acao
 
@@ -174,14 +174,14 @@ def registrar_acao(acao, tempo = 0):
     }
 
     try:
-        # checa se é um número de 1-9
+        # Checa se é um número de 1-9
         if 1 <= int(conteudo) <= 9:
             sudoku.inserir_numero(coluna, linha, int(conteudo))
             if tempo <= 0:
                 sudoku.atualizar_visualizacao(coluna, linha, int(conteudo))
             else:
                 sudoku.grade_label[linha][coluna].after(100*tempo, sudoku.atualizar_visualizacao, coluna, linha, int(conteudo))
-    # se não for um número, vai tentar procurar uma ação com o conteudo da variável
+    # Se não for um número, vai tentar procurar uma ação com o conteudo da variável
     except ValueError:
         if conteudo in acoes:
             acoes[conteudo](coluna, linha)
@@ -198,6 +198,8 @@ def inserir_teclado(evento):
     if jogada != None and len(jogada) == 3 and not sudoku.finalizado:
         registrar_acao(jogada)
         input_text.set("")
+    elif jogada == None:
+        exibir_erro(7, entrada)
     else:
         exibir_erro(jogada[0], entrada)
     if sudoku.finalizado:
@@ -237,7 +239,7 @@ def handle_click(evento):
     output('Insira um digito no seu teclado, Backspace para apagar,\n0 para verificar possibilidades ou Escape para cancelar')
     widget.bind('<KeyPress>', inserir_click)
 
-#f função do botão do batch
+# Função do botão de batch
 def set_batch():
     if batch.get():
         batch_entry = tk.Entry(batch_frame, textvariable=batch_text, name="entry")
@@ -319,6 +321,6 @@ root.bind('<Return>', inserir_teclado)
 
 # Iniciar o programa
 def iniciar_interface():
+    print('Iniciando interface')
     iniciar_matriz()
     root.mainloop()
-iniciar_interface()
