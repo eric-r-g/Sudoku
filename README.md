@@ -22,8 +22,12 @@ segue, não sendo separado em sub-arquivos.
 
 ## Sudoku
 
-#### opção 1 (interatico):
-navegue até a página de arquivo
-```python main.py (seu arquivo de pistas)
-obs: fornecemos um model já padrão caso queira testar
+#### opção 1 (interativo):
+1. inicialize o arquivo já na pasta devida
+```bash
+python main.py pistas.txt
+```
+obs: fornecemos um modelo de pistas já padrão, porém pode ser substituido de acordo com sua escolha 
+
+2. a partir dai, você estará no modo interativo
 
