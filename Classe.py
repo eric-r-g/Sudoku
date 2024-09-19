@@ -15,7 +15,7 @@ class Sudoku:
         if self.pistas[linha][coluna]:
             exibir_erro(2)
         elif numero_atual != 0:
-            substituir = input("Já existe um número nessa posição. Deseja substituir? (Digite 'sim' para prosseguir): ").strip().lower()
+            substituir = input("Ja existe um número nessa posição. Deseja substituir? (Digite 'sim' para prosseguir): ").strip().lower()
             if substituir == "sim":
                 self.grade[linha][coluna] = numero
             # Caso o usuário digite outra coisa, o código irá prosseguir normalmente.
@@ -35,6 +35,7 @@ class Sudoku:
             self.celulas_preenchidas -= 1
         if self.celulas_preenchidas < 81: self.finalizado = False
 
+    # Função para analisar se um número está presente.
     def existe_numero_presente(self, local, i, numero):
         # Analisa em uma coluna ou linha.
         if local.lower() == "coluna":
@@ -75,14 +76,16 @@ class Sudoku:
         
         return numeros_possiveis
 
+    # responśavel pela função de obter dicas.
     def obter_dica(self, coluna, linha):
         n_possiveis = self.verificar_possibilidades(coluna, linha)
 
         if len(n_possiveis) == 0:
-            print("Não possui números possiveis para essa posição.")
+            print("Nao possui numeros possiveis para essa posicao.")
         else:
-            print("Número(s) possiveis: " + ', '.join(map(str, n_possiveis)))
+            print("Numero(s) possiveis: " + ', '.join(map(str, n_possiveis)))
 
+    função para exibir a grade do jogo
     def exibir_grade(self):
         fil_padrao = [
             "    A   B   C    D   E   F    G   H   I",
@@ -90,6 +93,7 @@ class Sudoku:
             " ++===+===+===++===+===+===++===+===+===++"
         ]
 
+        # array contendo a ordem de impressão
         impres = [0, 1, 3, 1, 3, 1, 3, 2, 3, 1, 3, 1, 3, 2, 3, 1, 3, 1, 3, 1, 0]
         lin = 0
 

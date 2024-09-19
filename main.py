@@ -1,3 +1,8 @@
+# TRABALHO De FuP - SUDOKU
+# Eric Rodrigues Gomes - 564971
+#
+#
+
 import sys
 
 from Classe import Sudoku
@@ -15,6 +20,7 @@ def iniciar(modo):
     if modo in modos and not sudoku.finalizado:
         modos[modo](sudoku)
 
+# função para executar o metodo interativo
 def executar_interativo(sudoku):
     pistas_arquivo = obter_arquivo(1)
     registrar_acoes(sudoku, pistas_arquivo, True)
@@ -32,7 +38,10 @@ def executar_interativo(sudoku):
           sudoku.exibir_grade()
         elif jogada != None:
             exibir_erro(jogada[0], acao)
+    print("Parabens!! jogo finalizado com sucesso")
 
+
+# função para executar o metodo batch
 def executar_batch(sudoku):
     global batch
     batch = True    
@@ -63,6 +72,7 @@ def executar_batch(sudoku):
         print('Configuracao de dicas invalida.')
 
 
+# função para o recebimento de arquivo
 def obter_arquivo(i):
   with open(sys.argv[i], 'r') as file:
     return file.readlines()
@@ -70,6 +80,7 @@ def obter_arquivo_str(i):
     with open(sys.argv[i], 'r') as file:
         return file.read()
 
+# função para registar um conjunto de ações (pistas ou o modo batch)
 def registrar_acoes(sudoku, arquivo, arquivo_pista=False, batch = False):
     for jogada in arquivo:
         if not sudoku.finalizado:
@@ -102,7 +113,7 @@ def registrar_acoes(sudoku, arquivo, arquivo_pista=False, batch = False):
                     print('A jogada ('+chr(jogada_validada[0]+65)+','+str(jogada_validada[1]+1)+') = '+str(jogada_validada[2])+' eh invalida!')
            
 
-
+# função para realizar uma ação 
 def registrar_acao(sudoku, acao):
     coluna, linha, conteudo = acao
 
@@ -129,7 +140,10 @@ def registrar_acao(sudoku, acao):
 # 2. Batch
 
 if len(sys.argv) < 2 or len(sys.argv) > 3:
-  print("O número de parâmetros enviados para executar o sudoku é inválido.")
+  print("O numero de parametros enviados para executar o sudoku eh invalido.")
 else:
+    if sys.arqv == "interface:
+        # TODO: abrir modo interface
+        pass
     modo = len(sys.argv) - 1
     iniciar(modo)
