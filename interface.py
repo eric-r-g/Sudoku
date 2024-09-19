@@ -119,7 +119,7 @@ def output(output):
         qntd_outputs.set(qntd_outputs.get() + 1)
         output_str.set(output+f'[{qntd_outputs.get()}]')
 
-# funcao para registras as pistas
+# funcao para registras as pistas adaptada
 def registrar_pistas(evento):
     try:
         pistas = obter_arquivo(file_text.get())
@@ -145,6 +145,7 @@ def registrar_pistas(evento):
         output(erro.strerror)
     file_text.set("")
 
+# função para declarar o batch, adaptada
 def registrar_batch(evento):
     if batch.get():
         entradas = obter_arquivo(batch_text.get())
@@ -163,6 +164,7 @@ def registrar_batch(evento):
     else: output(saida)
     batch_text.set('')
 
+# função para as ações, mas adaptadas
 def registrar_acao(acao, tempo = 0):
     coluna, linha, conteudo = acao
 
@@ -235,6 +237,7 @@ def handle_click(evento):
     output('Insira um digito no seu teclado, Backspace para apagar,\n0 para verificar possibilidades ou Escape para cancelar')
     widget.bind('<KeyPress>', inserir_click)
 
+#f função do botão do batch
 def set_batch():
     if batch.get():
         batch_entry = tk.Entry(batch_frame, textvariable=batch_text, name="entry")
