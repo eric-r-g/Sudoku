@@ -46,16 +46,21 @@ def executar_interativo(sudoku):
 def executar_batch(sudoku):
     global batch
     batch = True    
-
+    
+    # Receber o arquivo de pistas na forma de lista e de string formatada
     pistas_arquivo = obter_arquivo(1)
-    pistas_str = obter_arquivo_str(1).replace(" ", "").strip().upper()
+    pistas_str = obter_arquivo_str(1).replace(" ", "").replace('\r', '').replace('\n', '').strip().upper()
 
+    # Validações específicas do batch
     invalida = False
     if len(pistas_arquivo) < 1 or len(pistas_arquivo) > 80:
         invalida = True
     for pista1 in pistas_arquivo:
-        pista1 = pista1.replace(" ", "").strip().upper().split(":")
+        # Para cada pista na lista: formatar e então separar a pista entre coordenadas e numero da jogada
+        pista1 = pista1.replace(" ", "").replace('\r', '').replace('\n', '').strip().upper().split(":")
         if pistas_str.count(pista1[0]) > 1:
+            # Usando o arquivo na forma de string para checar se existem duas pistas para a mesma coordenada
+            # Se existir mais de uma pista com a mesma coordenada, checar se algum desses casos declara numeros diferentes para a mesma coordenada
             for pista2 in pistas_arquivo:
                 pista2  = pista2.replace(" ", "").strip().upper().split(":")
                 if pista1[0] == pista2[0] and pista1[1] != pista2[1]: 
