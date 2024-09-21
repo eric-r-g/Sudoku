@@ -27,7 +27,6 @@ Para o modo interativo, é necessário inicializar o arquivo com um parâmetro e
 ```bash
 python main.py pistas.txt
 ```
-obs: já fornecemos um modelo pistas, embora o programa não seja restrio a ele
 
 #### opção 2 ( batch):
 Para o modo batch, é necessário inicializar o arquivo com dois parâmetros extra sendo eles respectivamente o nome do arquivo que contém as pistas e o nome do arquivo com as ações do modo batch
