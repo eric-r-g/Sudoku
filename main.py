@@ -1,7 +1,7 @@
 # TRABALHO De FuP - SUDOKU
 # Eric Rodrigues Gomes - 564971
 # João Ítalo de Almeida Campos - 567991
-#
+# Marcos Vinicius Pereira Araujo - 571042 
 
 import sys
 
