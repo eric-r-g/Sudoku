@@ -23,11 +23,21 @@ segue, não sendo separado em sub-arquivos.
 ## Sudoku
 
 #### opção 1 (interativo):
-1. inicialize o arquivo já na pasta devida
+Para o modo interativo, é necessário inicializar o arquivo com um parâmetro extra, sendo o nome do arquivo que contém as pistas
 ```bash
 python main.py pistas.txt
 ```
-obs: fornecemos um modelo de pistas já padrão, porém pode ser substituido de acordo com sua escolha 
+obs: já fornecemos um modelo pistas, embora o programa não seja restrio a ele
 
-2. a partir dai, você estará no modo interativo
+#### opção 2 ( batch):
+Para o modo batch, é necessário inicializar o arquivo com dois parâmetros extra sendo eles respectivamente o nome do arquivo que contém as pistas e o nome do arquivo com as ações do modo batch
+```bash
+python main.py pistas.txt inputbatch.txt
+```
 
+#### opção 3 (interface):
+Para o modo interface, é necessário inicializar o arquivo com um parâmetro extra escrito "interface"
+```bash
+python main.py interface
+```
+obs: o modo interface possui tanto o modo interativo como o batch, porém essa escolha já é feita dentro da interface.
